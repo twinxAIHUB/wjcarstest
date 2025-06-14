@@ -7,6 +7,11 @@ const publicPaths = ['/admin/login', '/api/admin/create'];
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Only handle admin routes
+  if (!pathname.startsWith('/admin') && !pathname.startsWith('/api/admin')) {
+    return NextResponse.next();
+  }
+
   // Allow access to public paths
   if (publicPaths.includes(pathname)) {
     return NextResponse.next();
@@ -19,24 +24,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/admin/login', request.url));
   }
 
-  // For admin routes, verify the token exists
-  if (pathname.startsWith('/admin')) {
-    if (!token) {
-      return NextResponse.redirect(new URL('/admin/login', request.url));
-    }
-    // Token exists, allow access
-    return NextResponse.next();
-  }
-
-  // Allow access to other routes
+  // Token exists, allow access
   return NextResponse.next();
 }
 
 export const config = {
   matcher: [
     '/admin/:path*',
-    '/dashboard/:path*',
-    '/api/admin/:path*',
-    '/((?!api|_next|.*\\..*).*)'
+    '/api/admin/:path*'
   ]
 }; 
