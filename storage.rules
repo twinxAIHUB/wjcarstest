@@ -1,0 +1,39 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function to check if user is admin
+    function isAdmin() {
+      let isAuth = request.auth != null;
+      let uid = request.auth.uid;
+      let adminDocPath = /databases/(default)/documents/admins/$(uid);
+      let exists = firestore.exists(adminDocPath);
+      return isAuth && exists;
+    }
+
+    match /vehicles/{imageId} {
+      // Allow read access to everyone
+      allow read: if true;
+      
+      // Allow write access to authenticated users with logging
+      allow write: if isAuthenticated() && (
+        // Log validation info
+        debug(sprintf(
+          "Auth: %s, UID: %s, Resource: %s",
+          request.auth,
+          request.auth.uid,
+          resource
+        )) || true
+      );
+    }
+    
+    // Default rule - deny everything else
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+} 

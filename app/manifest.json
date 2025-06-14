@@ -1,0 +1,16 @@
+{
+  "name": "Wise",
+  "short_name": "Wise",
+  "description": "Find your perfect luxury vehicle at Wise",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#10b981",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}
