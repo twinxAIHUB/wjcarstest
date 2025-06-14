@@ -181,7 +181,13 @@ export default function FinancingPage() {
             <div className="text-center">
               <p className="text-gray-600 mb-4">Have questions about financing?</p>
               <Button variant="outline" className="w-full" asChild>
-                <a href="https://wa.me/1234567890" target="_blank" rel="noopener noreferrer">Contact Our Finance Team</a>
+                <a
+                  href="https://api.whatsapp.com/send/?phone=13083891551&text=Hola+William%2C+me+interesa+el+servicio+de+Insurance+Premium.&type=phone_number&app_absent=0"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Contact Our Finance Team
+                </a>
               </Button>
             </div>
           </div>
