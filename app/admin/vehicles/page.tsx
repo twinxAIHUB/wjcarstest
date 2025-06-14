@@ -10,22 +10,7 @@ import VehicleForm from './components/VehicleForm';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-
-interface Vehicle {
-  id: string;
-  name: string;
-  year: number;
-  price: number;
-  status: 'available' | 'sold' | 'pending';
-  featured: boolean;
-  imageUrl: string;
-  mileage: number;
-  transmission: string;
-  rating: number;
-  description: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import type { Vehicle } from '@/types/vehicle';
 
 export default function VehiclesPage() {
   const { user, loading } = useAuth();
@@ -37,46 +22,58 @@ export default function VehiclesPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    console.log('Auth State:', {
-      user: user ? {
-        uid: user.uid,
-        email: user.email,
-        emailVerified: user.emailVerified,
-      } : null,
-      loading,
-      isAuthenticated: !!user
-    });
-
     if (!loading && !user) {
-      console.log('No user found, redirecting to login...');
       router.push('/admin/login');
       return;
     }
     
     if (user) {
-      console.log('User authenticated, fetching vehicles...');
       fetchVehicles();
     }
   }, [user, loading, router]);
 
   const fetchVehicles = async () => {
     try {
-      console.log('Starting to fetch vehicles...');
       const vehiclesRef = collection(db, 'vehicles');
       const q = query(vehiclesRef, orderBy('createdAt', 'desc'));
       
-      console.log('Current user token:', await auth.currentUser?.getIdToken());
-      
       const snapshot = await getDocs(q);
       
-      const vehiclesData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate(),
-        updatedAt: doc.data().updatedAt?.toDate(),
-      })) as Vehicle[];
+      const vehiclesData = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          images: data.images || [],
+          highlightImage: data.highlightImage || data.imageUrl || '',
+          brand: data.brand || '',
+          bodyStyle: data.bodyStyle || '',
+          fuelType: data.fuelType || '',
+          overview: data.overview || '',
+          features: data.features || [],
+          specifications: data.specifications || {
+            engine: '',
+            horsepower: 0,
+            torque: '',
+            transmission: '',
+            drivetrain: '',
+            bodyStyle: '',
+            seatingCapacity: 0,
+            fuelTank: 0,
+            cargoSpace: 0,
+            curbWeight: 0
+          },
+          history: data.history || {
+            title: 'clean',
+            previousOwners: 0,
+            serviceRecords: [],
+            lastService: ''
+          },
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || new Date()
+        } as Vehicle;
+      });
       
-      console.log('Vehicles fetched successfully:', vehiclesData.length);
       setVehicles(vehiclesData);
     } catch (error) {
       console.error('Error fetching vehicles:', error);
@@ -99,7 +96,7 @@ export default function VehiclesPage() {
         ...vehicleData,
         createdAt: new Date(),
         updatedAt: new Date(),
-      };
+      } as Vehicle;
 
       setVehicles(prev => [newVehicle, ...prev]);
     } catch (error) {
@@ -121,9 +118,9 @@ export default function VehiclesPage() {
       const updatedVehicle = {
         ...vehicleData,
         id: selectedVehicle.id,
-        createdAt: selectedVehicle.createdAt,
+        createdAt: selectedVehicle.createdAt || new Date(),
         updatedAt: new Date(),
-      };
+      } as Vehicle;
 
       setVehicles(prev => 
         prev.map(vehicle => 
@@ -141,11 +138,8 @@ export default function VehiclesPage() {
 
     try {
       const vehicleRef = doc(db, 'vehicles', vehicleId);
-      
       await deleteDoc(vehicleRef);
-      
       setVehicles(prev => prev.filter(vehicle => vehicle.id !== vehicleId));
-      
       toast.success('Vehicle deleted successfully');
     } catch (error) {
       console.error('Error deleting vehicle:', error);
@@ -200,37 +194,38 @@ export default function VehiclesPage() {
         </div>
       </div>
 
-      <Tab.Group selectedIndex={selectedTab} onChange={setSelectedTab}>
-        <Tab.List className="mt-6 flex space-x-6 border-b border-gray-200">
-          {tabs.map((tab, index) => (
-            <Tab
-              key={tab.name}
-              className={({ selected }) =>
-                `border-b-2 py-4 px-1 text-sm font-medium ${
-                  selected
-                    ? 'border-indigo-500 text-indigo-600'
-                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                }`
-              }
-            >
-              {tab.name}
-            </Tab>
-          ))}
-        </Tab.List>
-
-        <Tab.Panels className="mt-4">
-          {tabs.map((tab, index) => (
-            <Tab.Panel key={index} className="focus:outline-none">
-              <VehicleTable
-                vehicles={vehicles.filter(tab.filter)}
-                onEdit={handleEditVehicle}
-                onDelete={handleDeleteVehicle}
-                isLoading={isLoading}
-              />
-            </Tab.Panel>
-          ))}
-        </Tab.Panels>
-      </Tab.Group>
+      <div className="mt-8">
+        <Tab.Group selectedIndex={selectedTab} onChange={setSelectedTab}>
+          <Tab.List className="flex space-x-1 rounded-xl bg-gray-100 p-1">
+            {tabs.map((tab, index) => (
+              <Tab
+                key={tab.name}
+                className={({ selected }) =>
+                  `w-full rounded-lg py-2.5 text-sm font-medium leading-5
+                  ${selected
+                    ? 'bg-white text-indigo-700 shadow'
+                    : 'text-gray-600 hover:bg-white/[0.12] hover:text-gray-800'
+                  }`
+                }
+              >
+                {tab.name}
+              </Tab>
+            ))}
+          </Tab.List>
+          <Tab.Panels className="mt-4">
+            {tabs.map((tab, index) => (
+              <Tab.Panel key={index} className="focus:outline-none">
+                <VehicleTable
+                  vehicles={vehicles.filter(tab.filter)}
+                  onEdit={handleEditVehicle}
+                  onDelete={handleDeleteVehicle}
+                  isLoading={isLoading}
+                />
+              </Tab.Panel>
+            ))}
+          </Tab.Panels>
+        </Tab.Group>
+      </div>
 
       <VehicleForm
         isOpen={isFormOpen}
