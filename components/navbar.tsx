@@ -146,10 +146,12 @@ export default function Navbar() {
       {/* Main Navigation */}
       <nav className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center space-x-2">
-            <Image src="/logo.png" alt="William Keys Motors" width={40} height={40} />
-            <span className="font-bold text-xl">William Keys Motors</span>
-          </Link>
+          {/* Logo: Centered on mobile, left on desktop */}
+          <div className="flex-1 flex md:justify-start justify-center">
+            <Link href="/" className="flex items-center justify-center">
+              <Image src="/images/logo.png" alt="Wise Choices Logo" width={56} height={56} priority />
+            </Link>
+          </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
@@ -163,7 +165,7 @@ export default function Navbar() {
               <SheetContent side="left" className="w-[300px]">
                 <div className="flex justify-between items-center mb-6">
                   <Link href="/" className="flex items-center">
-                    <div className="relative h-10 w-32">
+                    <div className="relative h-20 w-36">
                       <Image src="/images/logo.png" alt="Wise Logo" fill className="object-contain" priority />
                     </div>
                   </Link>
@@ -249,11 +251,6 @@ export default function Navbar() {
                 </div>
               </SheetContent>
             </Sheet>
-            <Link href="/" className="flex items-center ml-4 md:ml-0">
-              <div className="relative h-10 w-32 md:w-40">
-                <Image src="/images/logo.png" alt="Wise Logo" fill className="object-contain" priority />
-              </div>
-            </Link>
           </div>
 
           <nav className="hidden md:flex items-center gap-1">
@@ -329,7 +326,7 @@ export default function Navbar() {
               <DropdownMenuContent align="start" className="w-48">
                 <DropdownMenuItem asChild>
                   <a
-                    href="https://api.whatsapp.com/send/?phone=13083891551&text=Hola+William%2C+me+interesa+el+servicio+de+Insurance+Premium.&type=phone_number&app_absent=0"
+                    href="https://api.whatsapp.com/send/?phone=13083891551&text=Hola%20William%2C%20me%20interesa%20Cotizar%20un%20seguro%20para%20mi%20auto&type=phone_number&app_absent=0"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="cursor-pointer w-full"
@@ -339,7 +336,7 @@ export default function Navbar() {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <a
-                    href="https://api.whatsapp.com/send/?phone=13083891551&text=Hola+William%2C+me+interesa+el+servicio+de+Trade+Car.&type=phone_number&app_absent=0"
+                    href="https://api.whatsapp.com/send/?phone=13083891551&text=Hola%20William%2C%20me%20interesa%20Cotizar%20un%20seguro%20para%20mi%20auto&type=phone_number&app_absent=0"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="cursor-pointer w-full"
@@ -420,6 +417,10 @@ export default function Navbar() {
         {isMobileMenuOpen && (
           <div className="md:hidden py-4 border-t">
             <div className="flex flex-col space-y-4">
+              {/* Logo at the top of mobile menu */}
+              <div className="flex justify-center mb-4">
+                <Image src="/images/logo.png" alt="Wise Choices Logo" width={80} height={80} priority />
+              </div>
               <Link
                 href="/cars"
                 className="text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-base font-medium"
