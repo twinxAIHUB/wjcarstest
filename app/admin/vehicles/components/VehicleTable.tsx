@@ -105,7 +105,7 @@ export default function VehicleTable({ vehicles, onEdit, onDelete, isLoading = f
                       )}
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {vehicle.updatedAt.toLocaleDateString()}
+                      {vehicle.updatedAt ? vehicle.updatedAt.toLocaleDateString() : 'N/A'}
                     </td>
                     <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                       <button
