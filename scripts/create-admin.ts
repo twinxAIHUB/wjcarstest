@@ -43,9 +43,13 @@ async function createAdmin() {
     console.log('User created:', user.id)
 
     // Create admin_users table if it doesn't exist
-    const { error: createTableError } = await supabaseAdmin.rpc('create_admin_table').catch(() => ({
-      error: null // Function might not exist, which is fine
-    }))
+    let createTableError = null;
+    try {
+      const { error } = await supabaseAdmin.rpc('create_admin_table');
+      createTableError = error;
+    } catch {
+      createTableError = null; // Function might not exist, which is fine
+    }
 
     if (createTableError) {
       console.log('Creating table directly...')

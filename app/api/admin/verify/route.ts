@@ -1,39 +1,34 @@
 import { NextResponse } from 'next/server';
-import { adminAuth, adminDb } from '@/lib/firebase-admin';
+import { adminAuth } from '@/lib/firebase-admin';
+import type { Auth } from 'firebase-admin/auth';
 
 export async function GET(request: Request) {
   try {
-    // Get the authorization header
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const { searchParams } = new URL(request.url);
+    const idToken = searchParams.get('idToken');
+
+    if (!idToken) {
+      return NextResponse.json(
+        { error: 'ID token is required' },
+        { status: 400 }
+      );
     }
 
-    // Get the ID token
-    const idToken = authHeader.split('Bearer ')[1];
-    
-    // Verify the token
-    const decodedToken = await adminAuth.verifyIdToken(idToken);
-    
-    // Check if user is in admins collection
-    const adminDoc = await adminDb.collection('admins').doc(decodedToken.uid).get();
-    
-    if (!adminDoc.exists) {
-      return NextResponse.json({ error: 'Not an admin' }, { status: 403 });
+    try {
+      const decodedToken = await (adminAuth as Auth).verifyIdToken(idToken);
+      return NextResponse.json({ uid: decodedToken.uid });
+    } catch (error) {
+      console.error('Error verifying token:', error);
+      return NextResponse.json(
+        { error: 'Invalid ID token' },
+        { status: 401 }
+      );
     }
-
-    return NextResponse.json({
-      isAdmin: true,
-      uid: decodedToken.uid,
-      email: decodedToken.email,
-      role: adminDoc.data()?.role
-    });
-
   } catch (error) {
-    console.error('Admin verification error:', error);
+    console.error('Error in verify route:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Verification failed' },
-      { status: 401 }
+      { error: 'Internal server error' },
+      { status: 500 }
     );
   }
 } 
