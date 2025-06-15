@@ -147,14 +147,14 @@ export default function Navbar() {
       <nav className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo: Centered on mobile, left on desktop */}
-          <div className="flex-1 flex md:justify-start justify-center">
+          <div className="flex-2 flex md:justify-start justify-center">
             <Link href="/" className="flex items-center justify-center">
               <Image 
                 src="/images/logo.png" 
                 alt="Wise Choices Logo" 
                 width={72} 
                 height={72} 
-                className="md:w-[72px] md:h-[50px] w-[64px] h-[50x]" 
+                className="md:w-[120px] md:h-[60px] w-[64px] h-[50x]" 
                 priority 
               />
             </Link>
