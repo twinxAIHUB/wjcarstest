@@ -460,20 +460,40 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
                     {previewUrls.map((url, index) => (
                       <div
                         key={index}
-                        className={`relative cursor-pointer border-2 rounded-lg overflow-hidden
-                          ${index === highlightImageIndex ? 'border-indigo-500' : 'border-gray-200'}`}
-                        onClick={() => handleHighlightImageChange(index)}
+                        className="relative group"
                       >
-                        <img
-                          src={url}
-                          alt={`Preview ${index + 1}`}
-                          className="h-24 w-full object-cover"
-                        />
-                        {index === highlightImageIndex && (
-                          <div className="absolute top-2 right-2 bg-indigo-500 text-white text-xs px-2 py-1 rounded">
-                            Main
-                          </div>
-                        )}
+                        <div
+                          className={`relative cursor-pointer border-2 rounded-lg overflow-hidden
+                            ${index === highlightImageIndex ? 'border-indigo-500' : 'border-gray-200'}`}
+                          onClick={() => handleHighlightImageChange(index)}
+                        >
+                          <img
+                            src={url}
+                            alt={`Preview ${index + 1}`}
+                            className="h-24 w-full object-cover"
+                          />
+                          {index === highlightImageIndex && (
+                            <div className="absolute top-2 right-2 bg-indigo-500 text-white text-xs px-2 py-1 rounded">
+                              Main
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newUrls = [...previewUrls];
+                            newUrls.splice(index, 1);
+                            setPreviewUrls(newUrls);
+                            if (index === highlightImageIndex) {
+                              setHighlightImageIndex(0);
+                            } else if (index < highlightImageIndex) {
+                              setHighlightImageIndex(highlightImageIndex - 1);
+                            }
+                          }}
+                          className="absolute top-2 left-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <XMarkIcon className="h-4 w-4" />
+                        </button>
                       </div>
                     ))}
                   </div>

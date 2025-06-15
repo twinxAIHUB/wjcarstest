@@ -149,7 +149,14 @@ export default function Navbar() {
           {/* Logo: Centered on mobile, left on desktop */}
           <div className="flex-1 flex md:justify-start justify-center">
             <Link href="/" className="flex items-center justify-center">
-              <Image src="/images/logo.png" alt="Wise Choices Logo" width={56} height={56} priority />
+              <Image 
+                src="/images/logo.png" 
+                alt="Wise Choices Logo" 
+                width={72} 
+                height={72} 
+                className="md:w-[72px] md:h-[50px] w-[64px] h-[50x]" 
+                priority 
+              />
             </Link>
           </div>
 
@@ -419,7 +426,14 @@ export default function Navbar() {
             <div className="flex flex-col space-y-4">
               {/* Logo at the top of mobile menu */}
               <div className="flex justify-center mb-4">
-                <Image src="/images/logo.png" alt="Wise Choices Logo" width={80} height={80} priority />
+                <Image 
+                  src="/images/logo.png" 
+                  alt="Wise Choices Logo" 
+                  width={96} 
+                  height={96} 
+                  className="w-[96px] h-[96px]" 
+                  priority 
+                />
               </div>
               <Link
                 href="/cars"

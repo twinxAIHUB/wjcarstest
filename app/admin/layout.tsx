@@ -11,7 +11,9 @@ import {
   ChartBarIcon,
   CogIcon,
   TruckIcon,
-  ArrowLeftOnRectangleIcon
+  ArrowLeftOnRectangleIcon,
+  Bars3Icon,
+  XMarkIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
@@ -26,6 +28,7 @@ export default function AdminLayout({
   const pathname = usePathname()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   const handleSignOut = async () => {
     try {
@@ -41,8 +44,24 @@ export default function AdminLayout({
 
   return (
     <div className="min-h-screen bg-gray-100">
+      {/* Mobile menu button */}
+      <div className="lg:hidden fixed top-4 left-4 z-50">
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="p-2 rounded-md bg-white shadow-md"
+        >
+          {isSidebarOpen ? (
+            <XMarkIcon className="h-6 w-6 text-gray-600" />
+          ) : (
+            <Bars3Icon className="h-6 w-6 text-gray-600" />
+          )}
+        </button>
+      </div>
+
       {/* Sidebar */}
-      <div className="fixed inset-y-0 left-0 w-64 bg-white border-r border-gray-200">
+      <div className={`fixed inset-y-0 left-0 w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 ease-in-out lg:translate-x-0 ${
+        isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      } lg:static lg:inset-auto lg:z-auto z-40`}>
         <div className="flex flex-col h-full">
           <div className="flex-1">
             {/* Logo */}
@@ -63,6 +82,7 @@ export default function AdminLayout({
                         ? 'bg-indigo-50 text-indigo-600'
                         : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                     }`}
+                    onClick={() => setIsSidebarOpen(false)}
                   >
                     <item.icon
                       className={`mr-3 h-6 w-6 ${
@@ -78,7 +98,7 @@ export default function AdminLayout({
           </div>
 
           {/* Logout button */}
-          <div className="flex-shrink-0 p-4 border-t border-gray-200">
+          <div className="p-4 border-t border-gray-200">
             <button
               onClick={handleSignOut}
               disabled={isLoading}
@@ -95,13 +115,21 @@ export default function AdminLayout({
       </div>
 
       {/* Main content */}
-      <div className="pl-64">
+      <div className="lg:pl-64">
         <main className="py-6">
           <div className="px-4 mx-auto max-w-7xl sm:px-6 md:px-8">
             {children}
           </div>
         </main>
       </div>
+
+      {/* Overlay for mobile */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 lg:hidden z-30"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
     </div>
   )
 } 
