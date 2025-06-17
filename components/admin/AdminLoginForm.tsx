@@ -67,8 +67,7 @@ export default function AdminLoginForm() {
       Cookies.set('token', token, { 
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        path: '/',
-        domain: window.location.hostname
+        path: '/'
       });
       console.log('Token stored in cookie');
 
