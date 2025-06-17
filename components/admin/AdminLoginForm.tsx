@@ -61,8 +61,8 @@ export default function AdminLoginForm() {
       // Force a router refresh to update the authentication state
       router.refresh();
 
-      // Redirect to admin dashboard
-      console.log('Redirecting to dashboard...');
+      // Redirect to vehicle management
+      console.log('Redirecting to vehicle management...');
       router.push('/admin/vehicles');
     } catch (error) {
       console.error('Auth error:', error);

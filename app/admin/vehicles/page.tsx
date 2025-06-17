@@ -110,11 +110,25 @@ export default function VehiclesPage() {
 
     try {
       const vehicleRef = doc(db, 'vehicles', selectedVehicle.id);
-      await updateDoc(vehicleRef, {
-        ...vehicleData,
-        updatedAt: serverTimestamp(),
+      
+      // Log the incoming data
+      console.log('Updating vehicle with data:', {
+        currentImages: selectedVehicle.images,
+        newImages: vehicleData.images,
+        removedImages: selectedVehicle.images.filter(img => !vehicleData.images.includes(img))
       });
 
+      // Create the update data with explicit image array
+      const updateData = {
+        ...vehicleData,
+        images: vehicleData.images, // Explicitly set the images array
+        updatedAt: serverTimestamp(),
+      };
+
+      // Update the document
+      await updateDoc(vehicleRef, updateData);
+
+      // Create the updated vehicle object
       const updatedVehicle = {
         ...vehicleData,
         id: selectedVehicle.id,
@@ -122,11 +136,16 @@ export default function VehiclesPage() {
         updatedAt: new Date(),
       } as Vehicle;
 
+      // Update the local state
       setVehicles(prev => 
         prev.map(vehicle => 
           vehicle.id === selectedVehicle.id ? updatedVehicle : vehicle
         )
       );
+
+      // Close the form and clear selection
+      setIsFormOpen(false);
+      setSelectedVehicle(undefined);
     } catch (error) {
       console.error('Error updating vehicle:', error);
       throw error;
