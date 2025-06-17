@@ -16,12 +16,12 @@ if (!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID) {
 
 // Firebase configuration
 const firebaseConfig: FirebaseOptions = {
-  apiKey: 'AIzaSyDUf3RttfMAYC8p1-SCiFc9sjDCPEPBcNg',
-  authDomain: 'wjcar-6dba9.firebaseapp.com',
-  projectId: 'wjcar-6dba9',
-  storageBucket: 'wjcar-6dba9.firebasestorage.app',
-  messagingSenderId: '561539716627',
-  appId: '1:561539716627:web:5b154a789d67ddb60011e6'
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
 // Validate required config

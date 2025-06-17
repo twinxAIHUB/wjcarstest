@@ -21,6 +21,7 @@ export async function middleware(request: NextRequest) {
 
   // Redirect to login if no token is present
   if (!token) {
+    console.log('No token found, redirecting to login');
     const loginUrl = new URL('/admin/login', request.url);
     loginUrl.searchParams.set('from', pathname);
     return NextResponse.redirect(loginUrl);
@@ -28,19 +29,28 @@ export async function middleware(request: NextRequest) {
 
   // Verify the token with the API
   try {
-    const verifyResponse = await fetch(`${request.nextUrl.origin}/api/admin/verify?idToken=${token}`);
+    console.log('Verifying token...');
+    const verifyResponse = await fetch(`${request.nextUrl.origin}/api/admin/verify?idToken=${token}`, {
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
+    });
+
     if (!verifyResponse.ok) {
+      console.error('Token verification failed:', await verifyResponse.text());
       throw new Error('Invalid token');
     }
+
+    console.log('Token verified successfully');
+    return NextResponse.next();
   } catch (error) {
+    console.error('Error in middleware:', error);
     // If token verification fails, redirect to login
     const loginUrl = new URL('/admin/login', request.url);
     loginUrl.searchParams.set('from', pathname);
     return NextResponse.redirect(loginUrl);
   }
-
-  // Token is valid, allow access
-  return NextResponse.next();
 }
 
 export const config = {

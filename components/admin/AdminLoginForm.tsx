@@ -28,7 +28,18 @@ export default function AdminLoginForm() {
       
       if (mode === 'login') {
         console.log('Attempting login...');
-        userCredential = await signInWithEmailAndPassword(auth, email, password);
+        try {
+          userCredential = await signInWithEmailAndPassword(auth, email, password);
+          console.log('Login successful:', userCredential.user.uid);
+        } catch (loginError) {
+          console.error('Login error:', loginError);
+          if ((loginError as AuthError)?.code === 'auth/invalid-credential') {
+            setError('Invalid email or password. Please try again.');
+          } else {
+            throw loginError;
+          }
+          return;
+        }
       } else {
         console.log('Starting admin account creation...');
         // First validate the email domain
@@ -51,10 +62,13 @@ export default function AdminLoginForm() {
       // Get the token and store it in a cookie
       console.log('Getting ID token...');
       const token = await userCredential.user.getIdToken();
+      console.log('Token received, setting cookie...');
+      
       Cookies.set('token', token, { 
-        secure: true,
-        sameSite: 'strict',
-        path: '/'
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        domain: window.location.hostname
       });
       console.log('Token stored in cookie');
 
@@ -74,6 +88,8 @@ export default function AdminLoginForm() {
         setError('Invalid email or password. Please try again.');
       } else if ((error as AuthError)?.code === 'auth/user-not-found') {
         setError('No account found with this email. Please create an account first.');
+      } else if ((error as AuthError)?.code === 'auth/network-request-failed') {
+        setError('Network error. Please check your internet connection and try again.');
       } else {
         setError(error instanceof Error ? error.message : 'Authentication failed');
       }
