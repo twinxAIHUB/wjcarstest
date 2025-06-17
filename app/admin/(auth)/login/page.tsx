@@ -1,5 +1,8 @@
 import { Metadata } from 'next';
 import AdminLoginForm from '@/components/admin/AdminLoginForm';
+import { useAuth } from '@/lib/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export const metadata: Metadata = {
   title: 'Admin Login',
@@ -7,6 +10,19 @@ export const metadata: Metadata = {
 };
 
 export default function AdminLoginPage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace('/admin/vehicles');
+    }
+  }, [user, loading, router]);
+
+  if (!loading && user) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-md">
