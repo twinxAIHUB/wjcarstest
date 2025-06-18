@@ -104,7 +104,6 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [highlightImageIndex, setHighlightImageIndex] = useState(0);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-  const [removedImages, setRemovedImages] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [features, setFeatures] = useState<string[]>([]);
   const [newFeature, setNewFeature] = useState('');
@@ -120,7 +119,6 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
       if (vehicle.images?.length > 0) {
         setPreviewUrls(vehicle.images);
       }
-      setRemovedImages([]);
     }
   }, [vehicle]);
 
@@ -168,63 +166,33 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
     setFeatures(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleImageRemove = (index: number) => {
-    const imageToRemove = previewUrls[index];
-    
-    // Add to removed images if it's an existing image (not a blob URL)
-    if (!imageToRemove.startsWith('blob:')) {
-      setRemovedImages(prev => [...prev, imageToRemove]);
-      console.log('Removing image:', imageToRemove);
-      console.log('Updated removed images:', [...removedImages, imageToRemove]);
-    }
-    
-    // Remove from preview URLs
-    const newPreviewUrls = previewUrls.filter((_, i) => i !== index);
-    setPreviewUrls(newPreviewUrls);
-    
-    // Remove from selected images if it's a new image
-    if (index < selectedImages.length) {
-      const newSelectedImages = selectedImages.filter((_, i) => i !== index);
-      setSelectedImages(newSelectedImages);
-    }
-    
-    // Update highlight image if needed
-    if (index === highlightImageIndex) {
-      setHighlightImageIndex(0);
-    } else if (index < highlightImageIndex) {
-      setHighlightImageIndex(highlightImageIndex - 1);
-    }
-  };
-
   const uploadImages = async () => {
-    if (!user) {
+    if (!selectedImages.length || !user) {
       return formData.images;
     }
 
     const uploadedUrls: string[] = [];
     
     try {
-      // First, handle new image uploads
-      if (selectedImages.length > 0) {
-        for (const image of selectedImages) {
-          const fileName = `${Date.now()}_${image.name}`;
-          const storageRef = ref(storage, `vehicles/${fileName}`);
-          
-          const snapshot = await uploadBytes(storageRef, image);
-          const downloadURL = await getDownloadURL(snapshot.ref);
-          uploadedUrls.push(downloadURL);
-        }
+      // Filter out any images that are already in formData.images
+      const newImages = selectedImages.filter(image => {
+        // Convert the image to a URL for comparison
+        const imageUrl = URL.createObjectURL(image);
+        // Check if this image URL is not already in formData.images
+        return !formData.images.includes(imageUrl);
+      });
+
+      for (const image of newImages) {
+        const fileName = `${Date.now()}_${image.name}`;
+        const storageRef = ref(storage, `vehicles/${fileName}`);
+        
+        const snapshot = await uploadBytes(storageRef, image);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        uploadedUrls.push(downloadURL);
       }
 
-      // Get the current preview URLs that are not from selected images
-      // These are the existing images that haven't been removed
-      const existingImages = previewUrls.filter(url => 
-        !url.startsWith('blob:') && // Filter out blob URLs (newly selected images)
-        !removedImages.includes(url) // Filter out removed images
-      );
-
-      // Combine existing images with newly uploaded images
-      return [...existingImages, ...uploadedUrls];
+      // Combine existing images with new uploaded images
+      return [...formData.images, ...uploadedUrls];
     } catch (error) {
       console.error('Error uploading images:', error);
       throw error;
@@ -240,47 +208,16 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
     setIsUploading(true);
 
     try {
-      // Upload any new images
-      let uploadedImageUrls: string[] = [];
-      if (selectedImages.length > 0) {
-        for (const image of selectedImages) {
-          const fileName = `${Date.now()}_${image.name}`;
-          const storageRef = ref(storage, `vehicles/${fileName}`);
-          
-          const snapshot = await uploadBytes(storageRef, image);
-          const downloadURL = await getDownloadURL(snapshot.ref);
-          uploadedImageUrls.push(downloadURL);
-        }
-      }
+      const uploadedImageUrls = await uploadImages();
+      const highlightImageUrl = uploadedImageUrls[highlightImageIndex] || formData.highlightImage;
 
-      // Get existing images that haven't been removed
-      const existingImages = previewUrls.filter(url => 
-        !url.startsWith('blob:') && // Filter out blob URLs (newly selected images)
-        !removedImages.includes(url) // Filter out removed images
-      );
-
-      // Combine existing and new images
-      const finalImages = [...existingImages, ...uploadedImageUrls];
-      const highlightImageUrl = finalImages[highlightImageIndex] || '';
-
-      // Log the image data before submission
-      console.log('Submitting form with images:', {
-        existingImages,
-        uploadedImageUrls,
-        finalImages,
-        removedImages,
-        previewUrls
-      });
-
-      const submitData = {
+      await onSubmit({
         ...formData,
-        images: finalImages,
+        images: uploadedImageUrls,
         highlightImage: highlightImageUrl,
-        imageUrl: highlightImageUrl,
+        imageUrl: highlightImageUrl, // Set the main image as the highlight image
         features,
-      };
-
-      await onSubmit(submitData);
+      });
       
       toast.success(vehicle ? 'Vehicle updated successfully' : 'Vehicle added successfully');
       onClose();
@@ -301,11 +238,11 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
       setFormData(prev => {
         const parentObj = prev[parent as keyof typeof prev] as Record<string, any>;
         return {
-          ...prev,
-          [parent]: {
+        ...prev,
+        [parent]: {
             ...(parentObj || {}),
-            [child]: type === 'number' ? Number(value) : value
-          }
+          [child]: type === 'number' ? Number(value) : value
+        }
         };
       });
     } else {
@@ -523,31 +460,20 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
                     {previewUrls.map((url, index) => (
                       <div
                         key={index}
-                        className="relative group"
+                        className={`relative cursor-pointer border-2 rounded-lg overflow-hidden
+                          ${index === highlightImageIndex ? 'border-indigo-500' : 'border-gray-200'}`}
+                        onClick={() => handleHighlightImageChange(index)}
                       >
-                        <div
-                          className={`relative cursor-pointer border-2 rounded-lg overflow-hidden
-                            ${index === highlightImageIndex ? 'border-indigo-500' : 'border-gray-200'}`}
-                          onClick={() => handleHighlightImageChange(index)}
-                        >
-                          <img
-                            src={url}
-                            alt={`Preview ${index + 1}`}
-                            className="h-24 w-full object-cover"
-                          />
-                          {index === highlightImageIndex && (
-                            <div className="absolute top-2 right-2 bg-indigo-500 text-white text-xs px-2 py-1 rounded">
-                              Main
-                            </div>
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handleImageRemove(index)}
-                          className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <XMarkIcon className="h-4 w-4" />
-                        </button>
+                        <img
+                          src={url}
+                          alt={`Preview ${index + 1}`}
+                          className="h-24 w-full object-cover"
+                        />
+                        {index === highlightImageIndex && (
+                          <div className="absolute top-2 right-2 bg-indigo-500 text-white text-xs px-2 py-1 rounded">
+                            Main
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

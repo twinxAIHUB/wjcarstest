@@ -19,8 +19,8 @@ export default function Home() {
     <div className="container mx-auto px-4 py-8">
       {/* Hero Section */}
       <section className="relative h-[60vh] md:h-[80vh] rounded-xl overflow-hidden mb-12">
-        {/* Video background for all devices */}
-        <div className="absolute inset-0 w-full h-full">
+        {/* Video background for desktop, fallback image for mobile */}
+        <div className="absolute inset-0 w-full h-full hidden md:block">
           <video
             autoPlay
             muted
@@ -33,9 +33,12 @@ export default function Home() {
             Your browser does not support the video tag.
           </video>
         </div>
-        {/* Content overlay */}
-        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-          <div className="max-w-4xl mx-auto px-4">
+        {/* Fallback image for mobile */}
+        <div className="absolute inset-0 w-full h-full md:hidden">
+          <Image src="/images/hero-bg.jpg" alt="Hero" fill className="object-cover" />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/30 flex flex-col justify-center px-4 md:px-16">
+          <div className="max-w-4xl mx-auto">
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
               The Best Deals in <span className="text-green-500">Florida</span>
             </h1>
@@ -141,7 +144,7 @@ export default function Home() {
                 {service.type === "whatsapp" ? (
                   <a
                     href={`https://api.whatsapp.com/send/?phone=13083891551&text=${encodeURIComponent(
-                      'Hola William, me interesa Cotizar un seguro para mi auto'
+                      service.whatsappText || ""
                     )}&type=phone_number&app_absent=0`}
                     target="_blank"
                     rel="noopener noreferrer"

@@ -42,7 +42,7 @@ export default function VehiclesPage() {
       const vehiclesData = snapshot.docs.map(doc => {
         const data = doc.data();
         return {
-          id: doc.id,
+        id: doc.id,
           ...data,
           images: data.images || [],
           highlightImage: data.highlightImage || data.imageUrl || '',
@@ -110,25 +110,11 @@ export default function VehiclesPage() {
 
     try {
       const vehicleRef = doc(db, 'vehicles', selectedVehicle.id);
-      
-      // Log the incoming data
-      console.log('Updating vehicle with data:', {
-        currentImages: selectedVehicle.images,
-        newImages: vehicleData.images,
-        removedImages: selectedVehicle.images.filter(img => !vehicleData.images.includes(img))
+      await updateDoc(vehicleRef, {
+        ...vehicleData,
+        updatedAt: serverTimestamp(),
       });
 
-      // Create the update data with explicit image array
-      const updateData = {
-        ...vehicleData,
-        images: vehicleData.images, // Explicitly set the images array
-        updatedAt: serverTimestamp(),
-      };
-
-      // Update the document
-      await updateDoc(vehicleRef, updateData);
-
-      // Create the updated vehicle object
       const updatedVehicle = {
         ...vehicleData,
         id: selectedVehicle.id,
@@ -136,16 +122,11 @@ export default function VehiclesPage() {
         updatedAt: new Date(),
       } as Vehicle;
 
-      // Update the local state
       setVehicles(prev => 
         prev.map(vehicle => 
           vehicle.id === selectedVehicle.id ? updatedVehicle : vehicle
         )
       );
-
-      // Close the form and clear selection
-      setIsFormOpen(false);
-      setSelectedVehicle(undefined);
     } catch (error) {
       console.error('Error updating vehicle:', error);
       throw error;
@@ -214,36 +195,36 @@ export default function VehiclesPage() {
       </div>
 
       <div className="mt-8">
-        <Tab.Group selectedIndex={selectedTab} onChange={setSelectedTab}>
+      <Tab.Group selectedIndex={selectedTab} onChange={setSelectedTab}>
           <Tab.List className="flex space-x-1 rounded-xl bg-gray-100 p-1">
-            {tabs.map((tab, index) => (
-              <Tab
-                key={tab.name}
-                className={({ selected }) =>
+          {tabs.map((tab, index) => (
+            <Tab
+              key={tab.name}
+              className={({ selected }) =>
                   `w-full rounded-lg py-2.5 text-sm font-medium leading-5
                   ${selected
                     ? 'bg-white text-indigo-700 shadow'
                     : 'text-gray-600 hover:bg-white/[0.12] hover:text-gray-800'
-                  }`
-                }
-              >
-                {tab.name}
-              </Tab>
-            ))}
-          </Tab.List>
-          <Tab.Panels className="mt-4">
-            {tabs.map((tab, index) => (
-              <Tab.Panel key={index} className="focus:outline-none">
-                <VehicleTable
-                  vehicles={vehicles.filter(tab.filter)}
-                  onEdit={handleEditVehicle}
-                  onDelete={handleDeleteVehicle}
-                  isLoading={isLoading}
-                />
-              </Tab.Panel>
-            ))}
-          </Tab.Panels>
-        </Tab.Group>
+                }`
+              }
+            >
+              {tab.name}
+            </Tab>
+          ))}
+        </Tab.List>
+        <Tab.Panels className="mt-4">
+          {tabs.map((tab, index) => (
+            <Tab.Panel key={index} className="focus:outline-none">
+              <VehicleTable
+                vehicles={vehicles.filter(tab.filter)}
+                onEdit={handleEditVehicle}
+                onDelete={handleDeleteVehicle}
+                isLoading={isLoading}
+              />
+            </Tab.Panel>
+          ))}
+        </Tab.Panels>
+      </Tab.Group>
       </div>
 
       <VehicleForm

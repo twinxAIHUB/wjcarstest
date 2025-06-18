@@ -147,16 +147,9 @@ export default function Navbar() {
       <nav className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo: Centered on mobile, left on desktop */}
-          <div className="flex-2 flex md:justify-start justify-center">
+          <div className="flex-1 flex md:justify-start justify-center">
             <Link href="/" className="flex items-center justify-center">
-              <Image 
-                src="/images/logo.png" 
-                alt="Wise Choices Logo" 
-                width={72} 
-                height={72} 
-                className="md:w-[120px] md:h-[60px] w-[64px] h-[50x]" 
-                priority 
-              />
+              <Image src="/images/logo.png" alt="Wise Choices Logo" width={40} height={40} priority />
             </Link>
           </div>
 
@@ -333,7 +326,7 @@ export default function Navbar() {
               <DropdownMenuContent align="start" className="w-48">
                 <DropdownMenuItem asChild>
                   <a
-                    href="https://api.whatsapp.com/send/?phone=13083891551&text=Hola%20William%2C%20me%20interesa%20Cotizar%20un%20seguro%20para%20mi%20auto&type=phone_number&app_absent=0"
+                    href="https://api.whatsapp.com/send/?phone=13083891551&text=Hola+William%2C+me+interesa+el+servicio+de+Insurance+Premium.&type=phone_number&app_absent=0"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="cursor-pointer w-full"
@@ -343,7 +336,7 @@ export default function Navbar() {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <a
-                    href="https://api.whatsapp.com/send/?phone=13083891551&text=Hola%20William%2C%20me%20interesa%20Cotizar%20un%20seguro%20para%20mi%20auto&type=phone_number&app_absent=0"
+                    href="https://api.whatsapp.com/send/?phone=13083891551&text=Hola+William%2C+me+interesa+el+servicio+de+Trade+Car.&type=phone_number&app_absent=0"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="cursor-pointer w-full"
@@ -426,14 +419,7 @@ export default function Navbar() {
             <div className="flex flex-col space-y-4">
               {/* Logo at the top of mobile menu */}
               <div className="flex justify-center mb-4">
-                <Image 
-                  src="/images/logo.png" 
-                  alt="Wise Choices Logo" 
-                  width={96} 
-                  height={96} 
-                  className="w-[96px] h-[96px]" 
-                  priority 
-                />
+                <Image src="/images/logo.png" alt="Wise Choices Logo" width={60} height={60} priority />
               </div>
               <Link
                 href="/cars"
