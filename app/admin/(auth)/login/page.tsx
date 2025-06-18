@@ -16,7 +16,11 @@ export default function AdminLoginPage() {
     }
   }, [user, loading, router]);
 
-  if (!loading && user) {
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
+  if (user) {
+    router.replace('/admin/vehicles');
     return null;
   }
 

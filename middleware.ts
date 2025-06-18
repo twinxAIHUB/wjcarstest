@@ -9,15 +9,18 @@ export async function middleware(request: NextRequest) {
 
   // Only handle admin routes
   if (!pathname.startsWith('/admin') && !pathname.startsWith('/api/admin')) {
+    console.log('Not an admin route, allowing.');
     return NextResponse.next();
   }
 
   // Allow access to public paths
   if (publicPaths.includes(pathname)) {
+    console.log('Public path, allowing:', pathname);
     return NextResponse.next();
   }
 
   const token = request.cookies.get('token')?.value;
+  console.log('Token from cookies:', token ? '[REDACTED]' : 'None');
 
   // Redirect to login if no token is present
   if (!token) {
@@ -38,7 +41,8 @@ export async function middleware(request: NextRequest) {
     });
 
     if (!verifyResponse.ok) {
-      console.error('Token verification failed:', await verifyResponse.text());
+      const errorText = await verifyResponse.text();
+      console.error('Token verification failed:', errorText);
       throw new Error('Invalid token');
     }
 

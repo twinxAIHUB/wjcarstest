@@ -34,8 +34,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           sameSite: 'lax',
           path: '/'
         });
+        console.log('Token cookie set:', token);
       } else {
         Cookies.remove('token');
+        console.log('Token cookie removed');
       }
     });
 
