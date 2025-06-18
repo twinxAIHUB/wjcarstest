@@ -14,6 +14,7 @@ export default function AdminLoginPage() {
   const router = useRouter();
 
   useEffect(() => {
+    console.log('Auth state in login page:', { user, loading });
     if (!loading && user) {
       router.replace('/admin/vehicles');
     }
