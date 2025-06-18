@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Pencil, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -21,21 +20,9 @@ interface Props {
 export default function FeaturedVehiclesList({ vehicles: initialVehicles }: Props) {
   const [vehicles, setVehicles] = useState(initialVehicles);
   const router = useRouter();
-  const supabase = createClientComponentClient();
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to remove this vehicle from featured listings?')) {
-      return;
-    }
-
-    const { error } = await supabase
-      .from('featured_vehicles')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      console.error('Error deleting vehicle:', error);
-      alert('Failed to delete vehicle');
       return;
     }
 

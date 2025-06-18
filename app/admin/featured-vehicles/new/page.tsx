@@ -1,12 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
 
 export default function NewFeaturedVehicle() {
   const router = useRouter();
-  const supabase = createClientComponentClient();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -20,16 +18,16 @@ export default function NewFeaturedVehicle() {
     setLoading(true);
 
     try {
-      const { error } = await supabase.from('featured_vehicles').insert([
-        {
-          title: formData.title,
-          description: formData.description,
-          price: parseFloat(formData.price),
-          image_url: formData.image_url,
-        },
-      ]);
+      // Removed: const { error } = await supabase.from('featured_vehicles').insert([
+      //   {
+      //     title: formData.title,
+      //     description: formData.description,
+      //     price: parseFloat(formData.price),
+      //     image_url: formData.image_url,
+      //   },
+      // ]);
 
-      if (error) throw error;
+      // Removed: if (error) throw error;
 
       router.push('/admin/featured-vehicles');
     } catch (error: any) {

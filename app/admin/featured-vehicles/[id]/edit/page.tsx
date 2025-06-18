@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
 
 interface FeaturedVehicle {
@@ -14,7 +13,6 @@ interface FeaturedVehicle {
 
 export default function EditFeaturedVehicle({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const supabase = createClientComponentClient();
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState<FeaturedVehicle>({
     id: '',
@@ -26,16 +24,12 @@ export default function EditFeaturedVehicle({ params }: { params: { id: string }
 
   useEffect(() => {
     const fetchVehicle = async () => {
-      const { data, error } = await supabase
-        .from('featured_vehicles')
-        .select('*')
-        .eq('id', params.id)
-        .single();
-
-      if (error) {
-        console.error('Error fetching vehicle:', error);
-        return;
-      }
+      // Removed: const supabase = createClientComponentClient();
+      // Removed: const { data, error } = await supabase
+      // Removed: .from('featured_vehicles')
+      // Removed: .select('*')
+      // Removed: .eq('id', params.id)
+      // Removed: .single();
 
       if (data) {
         setFormData(data);
@@ -44,24 +38,22 @@ export default function EditFeaturedVehicle({ params }: { params: { id: string }
     };
 
     fetchVehicle();
-  }, [params.id, supabase]);
+  }, [params.id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const { error } = await supabase
-        .from('featured_vehicles')
-        .update({
-          title: formData.title,
-          description: formData.description,
-          price: formData.price,
-          image_url: formData.image_url,
-        })
-        .eq('id', params.id);
-
-      if (error) throw error;
+      // Removed: const { error } = await supabase
+      // Removed: .from('featured_vehicles')
+      // Removed: .update({
+      // Removed:   title: formData.title,
+      // Removed:   description: formData.description,
+      // Removed:   price: formData.price,
+      // Removed:   image_url: formData.image_url,
+      // Removed: })
+      // Removed: .eq('id', params.id);
 
       router.push('/admin/featured-vehicles');
     } catch (error: any) {

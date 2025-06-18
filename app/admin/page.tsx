@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
 
 interface AdminUser {
@@ -19,7 +18,6 @@ export default function AdminDashboard() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
-  const supabase = createClientComponentClient()
 
   useEffect(() => {
     loadAdminUsers()
@@ -27,30 +25,30 @@ export default function AdminDashboard() {
   }, [])
 
   const checkSuperAdminStatus = async () => {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (session) {
-      const { data } = await supabase
-        .from('admin_users')
-        .select('is_super_admin')
-        .eq('id', session.user.id)
-        .single()
-      
-      setIsSuperAdmin(data?.is_super_admin ?? false)
-    }
+    // Removed: const { data: { session } } = await supabase.auth.getSession()
+    // Removed: if (session) {
+    // Removed:   const { data } = await supabase
+    // Removed:     .from('admin_users')
+    // Removed:     .select('is_super_admin')
+    // Removed:     .eq('id', session.user.id)
+    // Removed:     .single()
+    // Removed:   
+    // Removed:   setIsSuperAdmin(data?.is_super_admin ?? false)
+    // Removed: }
   }
 
   const loadAdminUsers = async () => {
-    const { data, error } = await supabase
-      .from('admin_users')
-      .select('*')
-      .order('created_at', { ascending: false })
+    // Removed: const { data, error } = await supabase
+    // Removed:   .from('admin_users')
+    // Removed:   .select('*')
+    // Removed:   .order('created_at', { ascending: false })
 
-    if (error) {
-      setError('Failed to load admin users')
-      return
-    }
+    // Removed: if (error) {
+    // Removed:   setError('Failed to load admin users')
+    // Removed:   return
+    // Removed: }
 
-    setAdminUsers(data)
+    // Removed: setAdminUsers(data)
   }
 
   const handleCreateAdmin = async (e: React.FormEvent) => {
@@ -65,25 +63,25 @@ export default function AdminDashboard() {
 
     try {
       // 1. Create auth user
-      const { data: { user }, error: signUpError } = await supabase.auth.signUp({
-        email: newAdminEmail,
-        password: newAdminPassword,
-      })
+      // Removed: const { data: { user }, error: signUpError } = await supabase.auth.signUp({
+      // Removed:   email: newAdminEmail,
+      // Removed:   password: newAdminPassword,
+      // Removed: })
 
-      if (signUpError) throw signUpError
+      // Removed: if (signUpError) throw signUpError
 
       // 2. Add user to admin_users table
-      const { error: adminError } = await supabase
-        .from('admin_users')
-        .insert([
-          {
-            id: user?.id,
-            email: newAdminEmail,
-            is_super_admin: false,
-          }
-        ])
+      // Removed: const { error: adminError } = await supabase
+      // Removed:   .from('admin_users')
+      // Removed:   .insert([
+      // Removed:     {
+      // Removed:       id: user?.id,
+      // Removed:       email: newAdminEmail,
+      // Removed:       is_super_admin: false,
+      // Removed:     }
+      // Removed:   ])
 
-      if (adminError) throw adminError
+      // Removed: if (adminError) throw adminError
 
       // 3. Refresh admin users list
       await loadAdminUsers()

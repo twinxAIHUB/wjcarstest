@@ -1,23 +1,14 @@
 export const dynamic = 'force-dynamic';
 
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
-import FeaturedVehiclesList from '@/components/admin/FeaturedVehiclesList';
+// Removed: import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+// Removed all supabase usage. Refactor this page to use your preferred backend or static data.
 
 async function getFeaturedVehicles() {
-  const supabase = createServerComponentClient({ cookies });
+  // Removed: const supabase = createServerComponentClient({ cookies });
   
-  const { data: vehicles, error } = await supabase
-    .from('featured_vehicles')
-    .select('*')
-    .order('created_at', { ascending: false });
+  // If you need to display vehicles, fetch them from your preferred backend or use static data.
 
-  if (error) {
-    console.error('Error fetching featured vehicles:', error);
-    return [];
-  }
-
-  return vehicles;
+  return [];
 }
 
 export default async function FeaturedVehiclesPage() {

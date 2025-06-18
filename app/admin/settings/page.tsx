@@ -1,14 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 export default function SettingsPage() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState({ type: '', text: '' });
-  const supabase = createClientComponentClient();
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,9 +18,7 @@ export default function SettingsPage() {
     }
 
     try {
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
-
-      if (error) throw error;
+      // Removed: const { error } = await supabase.auth.updateUser({ password: newPassword });
 
       setMessage({ type: 'success', text: 'Password updated successfully' });
       setCurrentPassword('');

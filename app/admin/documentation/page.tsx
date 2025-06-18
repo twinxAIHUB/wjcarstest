@@ -7,7 +7,7 @@ export default function DocumentationPage() {
       <section className="mb-8">
         <h2 className="text-2xl font-semibold mb-2">Overview</h2>
         <p>
-          This app is a luxury car sales platform built with Next.js, Firebase, and Supabase (for admin users). It features a public-facing site for browsing and searching vehicles, and an admin dashboard for managing inventory, sales, and admin users.
+          This app is a luxury car sales platform built with Next.js and Firebase. It features a public-facing site for browsing and searching vehicles, and an admin dashboard for managing inventory, sales, and admin users.
         </p>
       </section>
       <section className="mb-8">
