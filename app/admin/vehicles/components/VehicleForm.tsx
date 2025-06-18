@@ -166,6 +166,21 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
     setFeatures(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handleRemoveImage = (index: number) => {
+    setPreviewUrls(prev => prev.filter((_, i) => i !== index));
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
+    }));
+    setSelectedImages(prev => prev.filter((_, i) => i !== index));
+    // Adjust highlight image index if needed
+    setHighlightImageIndex(prev => {
+      if (index === prev && prev > 0) return prev - 1;
+      if (index < prev) return prev - 1;
+      return prev;
+    });
+  };
+
   const uploadImages = async () => {
     if (!selectedImages.length || !user) {
       return formData.images;
@@ -474,6 +489,14 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
                             Main
                           </div>
                         )}
+                        <button
+                          type="button"
+                          onClick={e => { e.stopPropagation(); handleRemoveImage(index); }}
+                          className="absolute top-2 left-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-700"
+                          title="Remove image"
+                        >
+                          <XMarkIcon className="h-4 w-4" />
+                        </button>
                       </div>
                     ))}
                   </div>
