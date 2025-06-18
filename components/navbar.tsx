@@ -146,10 +146,12 @@ export default function Navbar() {
       {/* Main Navigation */}
       <nav className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Logo: Centered on mobile, left on desktop */}
-          <div className="flex-1 flex md:justify-start justify-center">
-            <Link href="/" className="flex items-center justify-center">
-              <Image src="/images/logo.png" alt="Wise Choices Logo" width={40} height={40} priority />
+          {/* Logo: Left on all views, bigger on desktop */}
+          <div className="flex-1 flex justify-start">
+            <Link href="/" className="flex items-center">
+              <div className="relative h-12 w-32 md:h-20 md:w-44">
+                <Image src="/images/logo.png" alt="Wise Choices Logo" fill className="object-contain" priority />
+              </div>
             </Link>
           </div>
 
@@ -418,8 +420,10 @@ export default function Navbar() {
           <div className="md:hidden py-4 border-t">
             <div className="flex flex-col space-y-4">
               {/* Logo at the top of mobile menu */}
-              <div className="flex justify-center mb-4">
-                <Image src="/images/logo.png" alt="Wise Choices Logo" width={60} height={60} priority />
+              <div className="flex justify-start mb-4 pl-2">
+                <div className="relative h-12 w-32">
+                  <Image src="/images/logo.png" alt="Wise Choices Logo" fill className="object-contain" priority />
+                </div>
               </div>
               <Link
                 href="/cars"

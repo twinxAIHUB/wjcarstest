@@ -19,8 +19,8 @@ export default function Home() {
     <div className="container mx-auto px-4 py-8">
       {/* Hero Section */}
       <section className="relative h-[60vh] md:h-[80vh] rounded-xl overflow-hidden mb-12">
-        {/* Video background for desktop, fallback image for mobile */}
-        <div className="absolute inset-0 w-full h-full hidden md:block">
+        {/* Video background for all devices, fallback image if video fails */}
+        <div className="absolute inset-0 w-full h-full">
           <video
             autoPlay
             muted
@@ -32,10 +32,6 @@ export default function Home() {
             <source src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/11957140_1920_1080_60fps-mqz6omTWaVjuS0YYRmpeCAwUn7TNey.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
-        </div>
-        {/* Fallback image for mobile */}
-        <div className="absolute inset-0 w-full h-full md:hidden">
-          <Image src="/images/hero-bg.jpg" alt="Hero" fill className="object-cover" />
         </div>
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/30 flex flex-col justify-center px-4 md:px-16">
           <div className="max-w-4xl mx-auto">
