@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Tab } from '@headlessui/react';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, orderBy, getDoc } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import VehicleTable from './components/VehicleTable';
 import VehicleForm from './components/VehicleForm';
@@ -110,6 +110,11 @@ export default function VehiclesPage() {
 
     try {
       const vehicleRef = doc(db, 'vehicles', selectedVehicle.id);
+      const docSnap = await getDoc(vehicleRef);
+      if (!docSnap.exists()) {
+        toast.error('Vehicle does not exist in the database.');
+        return;
+      }
       await updateDoc(vehicleRef, {
         ...vehicleData,
         updatedAt: serverTimestamp(),

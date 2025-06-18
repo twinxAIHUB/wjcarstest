@@ -116,35 +116,26 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
         highlightImage: vehicle.highlightImage || vehicle.imageUrl,
       });
       setFeatures(vehicle.features || []);
-      if (vehicle.images?.length > 0) {
-        setPreviewUrls(vehicle.images);
-      }
+      setPreviewUrls(vehicle.images || []);
+      setSelectedImages([]);
+      setHighlightImageIndex(0);
     }
   }, [vehicle]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
-      
-      // Filter out duplicate images based on name and size
-      const newFiles = files.filter(file => {
-        return !selectedImages.some(existingFile => 
-          existingFile.name === file.name && 
-          existingFile.size === file.size
-        );
-      });
-
-      // Limit to 10 images max
-      if (selectedImages.length + newFiles.length > 10) {
+      if (formData.images.length + files.length > 10) {
         toast.error('You can upload a maximum of 10 images.');
         return;
       }
-
-      setSelectedImages(prev => [...prev, ...newFiles]);
-      
-      // Create preview URLs for new images
-      const newPreviewUrls = newFiles.map(file => URL.createObjectURL(file));
+      setSelectedImages(prev => [...prev, ...files]);
+      const newPreviewUrls = files.map(file => URL.createObjectURL(file));
       setPreviewUrls(prev => [...prev, ...newPreviewUrls]);
+      setFormData(prev => ({
+        ...prev,
+        images: [...prev.images, ...newPreviewUrls],
+      }));
     }
   };
 
@@ -167,13 +158,18 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
   };
 
   const handleRemoveImage = (index: number) => {
-    setPreviewUrls(prev => prev.filter((_, i) => i !== index));
     setFormData(prev => ({
       ...prev,
       images: prev.images.filter((_, i) => i !== index),
     }));
-    setSelectedImages(prev => prev.filter((_, i) => i !== index));
-    // Adjust highlight image index if needed
+    setPreviewUrls(prev => prev.filter((_, i) => i !== index));
+    setSelectedImages(prev => {
+      if (previewUrls[index]?.startsWith('blob:')) {
+        const previewIndex = previewUrls.slice(0, index + 1).filter(url => url.startsWith('blob:')).length - 1;
+        return prev.filter((_, i) => i !== previewIndex);
+      }
+      return prev;
+    });
     setHighlightImageIndex(prev => {
       if (index === prev && prev > 0) return prev - 1;
       if (index < prev) return prev - 1;
@@ -183,31 +179,21 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
 
   const uploadImages = async () => {
     if (!selectedImages.length || !user) {
-      return formData.images;
+      return formData.images.filter(url => !url.startsWith('blob:'));
     }
-
     const uploadedUrls: string[] = [];
-    
     try {
-      // Filter out any images that are already in formData.images
-      const newImages = selectedImages.filter(image => {
-        // Convert the image to a URL for comparison
-        const imageUrl = URL.createObjectURL(image);
-        // Check if this image URL is not already in formData.images
-        return !formData.images.includes(imageUrl);
-      });
-
-      for (const image of newImages) {
+      for (const image of selectedImages) {
         const fileName = `${Date.now()}_${image.name}`;
         const storageRef = ref(storage, `vehicles/${fileName}`);
-        
         const snapshot = await uploadBytes(storageRef, image);
         const downloadURL = await getDownloadURL(snapshot.ref);
         uploadedUrls.push(downloadURL);
       }
-
-      // Combine existing images with new uploaded images
-      return [...formData.images, ...uploadedUrls];
+      const finalImages = formData.images.map(url =>
+        url.startsWith('blob:') ? uploadedUrls.shift()! : url
+      );
+      return finalImages;
     } catch (error) {
       console.error('Error uploading images:', error);
       throw error;
@@ -230,7 +216,7 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
         ...formData,
         images: uploadedImageUrls,
         highlightImage: highlightImageUrl,
-        imageUrl: highlightImageUrl, // Set the main image as the highlight image
+        imageUrl: highlightImageUrl,
         features,
       });
       
@@ -248,7 +234,6 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
     const { name, value, type } = e.target;
     
     if (name.includes('.')) {
-      // Handle nested properties (e.g., specifications.engine)
       const [parent, child] = name.split('.');
       setFormData(prev => {
         const parentObj = prev[parent as keyof typeof prev] as Record<string, any>;
@@ -261,7 +246,6 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
         };
       });
     } else {
-      // Handle top-level properties
       setFormData(prev => ({
         ...prev,
         [name]: type === 'number' ? Number(value) : value

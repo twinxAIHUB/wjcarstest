@@ -258,29 +258,29 @@ export default function BookingPage() {
       {/* FAQ Section */}
       <section className="mt-8 md:mt-12">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto">
             <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">Frequently Asked Questions</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="bg-white p-4 md:p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                 <h3 className="font-bold mb-2 flex items-center text-base md:text-lg">
                   <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-green-600 mr-2 flex-shrink-0" />
-                  What happens after I book an appointment?
-                </h3>
+                What happens after I book an appointment?
+              </h3>
                 <p className="text-gray-600 text-sm md:text-base">
-                  You'll receive an email confirmation with your appointment details. Our team will also reach out to
-                  confirm and answer any preliminary questions you might have.
-                </p>
-              </div>
+                You'll receive an email confirmation with your appointment details. Our team will also reach out to
+                confirm and answer any preliminary questions you might have.
+              </p>
+            </div>
               <div className="bg-white p-4 md:p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                 <h3 className="font-bold mb-2 flex items-center text-base md:text-lg">
                   <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-green-600 mr-2 flex-shrink-0" />
-                  Can I reschedule my appointment?
-                </h3>
+                Can I reschedule my appointment?
+              </h3>
                 <p className="text-gray-600 text-sm md:text-base">
-                  Yes, you can reschedule through the confirmation email you receive or by calling our customer service
-                  team at (555) 123-4567.
-                </p>
-              </div>
+                Yes, you can reschedule through the confirmation email you receive or by calling our customer service
+                team at (555) 123-4567.
+              </p>
+            </div>
             </div>
           </div>
         </div>

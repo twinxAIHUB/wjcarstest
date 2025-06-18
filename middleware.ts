@@ -24,7 +24,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/admin/login', request.url));
   }
 
-  // Token exists, allow access
+    // Token exists, allow access
   return NextResponse.next();
 }
 

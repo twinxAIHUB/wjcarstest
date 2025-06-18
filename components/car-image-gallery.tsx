@@ -5,6 +5,7 @@ import Image from "next/image"
 import { ChevronLeft, ChevronRight, Expand, Play } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+import { motion } from "framer-motion"
 
 interface CarImageGalleryProps {
   images: string[]
@@ -37,13 +38,23 @@ export default function CarImageGallery({ images, make, model, videoUrl }: CarIm
             onEnded={() => setShowVideo(false)}
           />
         ) : (
-          <Image
-            src={images[currentImage] || "/placeholder.svg"}
-            alt={`${make} ${model}`}
-            fill
-            className="object-cover"
-            priority
-          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="w-full h-full"
+          >
+            <Image
+              src={images[currentImage] || "/placeholder.svg"}
+              alt={`${make} ${model}`}
+              fill
+              className="object-cover"
+              priority
+              placeholder="blur"
+              blurDataURL="/placeholder.svg"
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+          </motion.div>
         )}
         {!showVideo && (
           <>
@@ -78,12 +89,22 @@ export default function CarImageGallery({ images, make, model, videoUrl }: CarIm
               </DialogTrigger>
               <DialogContent className="max-w-5xl">
                 <div className="relative aspect-[16/9]">
-                  <Image
-                    src={images[currentImage] || "/placeholder.svg"}
-                    alt={`${make} ${model} - Fullscreen view`}
-                    fill
-                    className="object-contain"
-                  />
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.4 }}
+                    className="w-full h-full"
+                  >
+                    <Image
+                      src={images[currentImage] || "/placeholder.svg"}
+                      alt={`${make} ${model} - Fullscreen view`}
+                      fill
+                      className="object-contain"
+                      placeholder="blur"
+                      blurDataURL="/placeholder.svg"
+                      sizes="100vw"
+                    />
+                  </motion.div>
                 </div>
               </DialogContent>
             </Dialog>
@@ -113,12 +134,23 @@ export default function CarImageGallery({ images, make, model, videoUrl }: CarIm
               setShowVideo(false)
             }}
           >
-            <Image
-              src={image || "/placeholder.svg"}
-              alt={`${make} ${model} - Thumbnail ${index + 1}`}
-              fill
-              className="object-cover"
-            />
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.05 }}
+              className="w-full h-full"
+            >
+              <Image
+                src={image || "/placeholder.svg"}
+                alt={`${make} ${model} - Thumbnail ${index + 1}`}
+                fill
+                className="object-cover"
+                loading="lazy"
+                placeholder="blur"
+                blurDataURL="/placeholder.svg"
+                sizes="(max-width: 768px) 20vw, 10vw"
+              />
+            </motion.div>
           </button>
         ))}
         {videoUrl && (

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
+import { motion } from 'framer-motion';
 
 interface Category {
   name: string;
@@ -136,23 +137,33 @@ export default function VehicleCategories() {
     <section className="mb-16">
       <h2 className="text-3xl font-bold mb-8">Browse by Category</h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {categories.map((category) => (
-          <Link
+        {categories.map((category, i) => (
+          <motion.div
             key={category.name}
-            href={category.link}
-            className="relative h-40 rounded-lg overflow-hidden group cursor-pointer"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: i * 0.07 }}
           >
-            <Image
-              src={category.imageUrl || "/placeholder.svg"}
-              alt={category.name}
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors flex flex-col items-center justify-center">
-              <h3 className="text-white font-bold text-xl mb-2">{category.name}</h3>
-              <span className="text-white/80 text-sm">{category.count} vehicles</span>
-            </div>
-          </Link>
+            <Link
+              href={category.link}
+              className="relative h-40 rounded-lg overflow-hidden group cursor-pointer"
+            >
+              <Image
+                src={category.imageUrl || "/placeholder.svg"}
+                alt={category.name}
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                placeholder="blur"
+                blurDataURL="/placeholder.svg"
+                sizes="(max-width: 768px) 50vw, 16vw"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors flex flex-col items-center justify-center">
+                <h3 className="text-white font-bold text-xl mb-2">{category.name}</h3>
+                <span className="text-white/80 text-sm">{category.count} vehicles</span>
+              </div>
+            </Link>
+          </motion.div>
         ))}
       </div>
     </section>

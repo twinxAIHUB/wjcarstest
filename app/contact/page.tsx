@@ -30,31 +30,31 @@ export default function ContactPage() {
                 <h2 className="text-2xl font-semibold mb-6">Send us a Message</h2>
                 <form className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
+                <div>
                       <Label htmlFor="firstName">First Name</Label>
                       <Input id="firstName" placeholder="John" />
-                    </div>
-                    <div>
+                </div>
+                <div>
                       <Label htmlFor="lastName">Last Name</Label>
                       <Input id="lastName" placeholder="Doe" />
-                    </div>
-                  </div>
-                  <div>
+                </div>
+              </div>
+                <div>
                     <Label htmlFor="email">Email</Label>
                     <Input id="email" type="email" placeholder="john@example.com" />
-                  </div>
-                  <div>
+                </div>
+                <div>
                     <Label htmlFor="phone">Phone Number</Label>
                     <Input id="phone" type="tel" placeholder="(555) 123-4567" />
-                  </div>
-                  <div>
+              </div>
+              <div>
                     <Label htmlFor="message">Message</Label>
-                    <Textarea
-                      id="message"
+                <Textarea
+                  id="message"
                       placeholder="How can we help you?"
                       className="min-h-[120px]"
-                    />
-                  </div>
+                />
+              </div>
                   <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">
                     Send Message
                   </Button>
@@ -70,68 +70,68 @@ export default function ContactPage() {
                       <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center mr-3 mt-1">
                         <Phone className="h-5 w-5 text-green-600" />
                       </div>
-                      <div>
+              <div>
                         <h3 className="font-semibold text-lg">Phone</h3>
                         <a href="tel:13083891551" className="text-gray-600 hover:text-green-600">
                           +1 (308) 389-1551
                         </a>
-                      </div>
-                    </div>
+              </div>
+          </div>
 
-                    <div className="flex items-start">
-                      <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center mr-3 mt-1">
-                        <MapPin className="h-5 w-5 text-green-600" />
-                      </div>
-                      <div>
+                <div className="flex items-start">
+                  <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center mr-3 mt-1">
+                    <MapPin className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div>
                         <h3 className="font-semibold text-lg">Location</h3>
-                        <a
-                          href="https://maps.google.com/?q=West+Palm+Beach+FL+33409"
-                          target="_blank"
-                          rel="noopener noreferrer"
+                    <a
+                      href="https://maps.google.com/?q=West+Palm+Beach+FL+33409"
+                      target="_blank"
+                      rel="noopener noreferrer"
                           className="text-gray-600 hover:text-green-600"
-                        >
+                    >
                           West Palm Beach, FL 33409
-                        </a>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start">
-                      <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center mr-3 mt-1">
-                        <Mail className="h-5 w-5 text-green-600" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-lg">Email</h3>
-                        <a href="mailto:Williamkeysmotors@gmail.com" className="text-gray-600 hover:text-green-600">
-                          Williamkeysmotors@gmail.com
-                        </a>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start">
-                      <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center mr-3 mt-1">
-                        <Clock className="h-5 w-5 text-green-600" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-lg">Business Hours</h3>
-                        <p className="text-gray-600">Monday - Friday: 9:00 AM - 7:00 PM</p>
-                        <p className="text-gray-600">Saturday: 10:00 AM - 6:00 PM</p>
-                        <p className="text-gray-600">Sunday: 11:00 AM - 4:00 PM</p>
-                      </div>
-                    </div>
+                    </a>
                   </div>
                 </div>
 
+                <div className="flex items-start">
+                  <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center mr-3 mt-1">
+                    <Mail className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Email</h3>
+                        <a href="mailto:Williamkeysmotors@gmail.com" className="text-gray-600 hover:text-green-600">
+                          Williamkeysmotors@gmail.com
+                        </a>
+                  </div>
+                </div>
+
+                <div className="flex items-start">
+                  <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center mr-3 mt-1">
+                    <Clock className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Business Hours</h3>
+                    <p className="text-gray-600">Monday - Friday: 9:00 AM - 7:00 PM</p>
+                    <p className="text-gray-600">Saturday: 10:00 AM - 6:00 PM</p>
+                    <p className="text-gray-600">Sunday: 11:00 AM - 4:00 PM</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
                 <div className="bg-green-50 p-6 md:p-8 rounded-xl border border-green-100">
-                  <div className="flex items-start">
-                    <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center mr-3 mt-1">
-                      <CheckCircle className="h-5 w-5 text-green-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg">Quick Response</h3>
-                      <p className="text-gray-700">
-                        We aim to respond to all inquiries within 24 hours. For immediate assistance, please call our sales
-                        team.
-                      </p>
+              <div className="flex items-start">
+                <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center mr-3 mt-1">
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg">Quick Response</h3>
+                  <p className="text-gray-700">
+                    We aim to respond to all inquiries within 24 hours. For immediate assistance, please call our sales
+                    team.
+                  </p>
                     </div>
                   </div>
                 </div>

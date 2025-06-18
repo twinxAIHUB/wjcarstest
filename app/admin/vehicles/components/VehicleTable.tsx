@@ -25,6 +25,9 @@ export default function VehicleTable({ vehicles, onEdit, onDelete, isLoading = f
     );
   }
 
+  // Remove duplicate vehicles by id
+  const uniqueVehicles = Array.from(new Map(vehicles.map(v => [v.id, v])).values());
+
   return (
     <div className="mt-4 flow-root">
       <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -60,7 +63,7 @@ export default function VehicleTable({ vehicles, onEdit, onDelete, isLoading = f
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
-                {vehicles.map((vehicle) => (
+                {uniqueVehicles.map((vehicle) => (
                   <tr key={vehicle.id}>
                     <td className="whitespace-nowrap py-4 pl-4 pr-3 sm:pl-6">
                       {vehicle.imageUrl ? (

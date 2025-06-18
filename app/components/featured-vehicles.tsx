@@ -7,6 +7,7 @@ import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { motion } from 'framer-motion';
 
 interface Vehicle {
   id: string;
@@ -85,38 +86,48 @@ export default function FeaturedVehicles() {
           </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {vehicles.map((vehicle) => (
-            <Link
+          {vehicles.map((vehicle, i) => (
+            <motion.div
               key={vehicle.id}
-              href={`/cars/${vehicle.id}`}
-              className="group block"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
             >
-              <div className="relative">
-                <div className="relative aspect-[16/10] rounded-lg overflow-hidden mb-4">
-                  <Image
-                    src={vehicle.imageUrl}
-                    alt={vehicle.name}
-                    fill
-                    className="object-cover transition-transform group-hover:scale-105"
-                  />
-                </div>
-                <Badge className="absolute top-2 left-2 bg-green-600">Featured</Badge>
-                {vehicle.rating && (
-                  <div className="absolute top-2 right-2 bg-white/90 rounded-full p-1.5 flex items-center gap-1">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-sm font-medium">{vehicle.rating}</span>
+              <Link
+                href={`/cars/${vehicle.id}`}
+                className="group block"
+              >
+                <div className="relative">
+                  <div className="relative aspect-[16/10] rounded-lg overflow-hidden mb-4">
+                    <Image
+                      src={vehicle.imageUrl}
+                      alt={vehicle.name}
+                      fill
+                      className="object-cover transition-transform group-hover:scale-105"
+                      placeholder="blur"
+                      blurDataURL="/placeholder.svg"
+                      sizes="(max-width: 768px) 100vw, 25vw"
+                      loading="lazy"
+                    />
                   </div>
-                )}
-              </div>
-              <h3 className="font-semibold text-lg mb-2">{vehicle.name}</h3>
-              <div className="text-xl font-bold text-green-600 mb-2">
-                ${vehicle.price.toLocaleString()}
-              </div>
-              <div className="flex items-center justify-between text-sm text-gray-500">
-                <span>{vehicle.mileage.toLocaleString()} miles</span>
-                <span>{vehicle.transmission}</span>
-              </div>
-            </Link>
+                  <Badge className="absolute top-2 left-2 bg-green-600">Featured</Badge>
+                  {vehicle.rating && (
+                    <div className="absolute top-2 right-2 bg-white/90 rounded-full p-1.5 flex items-center gap-1">
+                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      <span className="text-sm font-medium">{vehicle.rating}</span>
+                    </div>
+                  )}
+                </div>
+                <h3 className="font-semibold text-lg mb-2">{vehicle.name}</h3>
+                <div className="text-xl font-bold text-green-600 mb-2">
+                  ${vehicle.price.toLocaleString()}
+                </div>
+                <div className="flex items-center justify-between text-sm text-gray-500">
+                  <span>{vehicle.mileage.toLocaleString()} miles</span>
+                  <span>{vehicle.transmission}</span>
+                </div>
+              </Link>
+            </motion.div>
           ))}
         </div>
       </div>

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { ArrowRight, Star, ChevronRight, Phone } from "lucide-react"
 import FeaturedVehicles from "./components/featured-vehicles"
 import VehicleCategories from './components/vehicle-categories'
+import { motion } from 'framer-motion';
 // import { useTranslation } from './contexts/TranslationContext';
 
 export default function Home() {
@@ -18,7 +19,12 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Hero Section */}
-      <section className="relative h-[60vh] md:h-[80vh] rounded-xl overflow-hidden mb-12">
+      <motion.section
+        className="relative h-[60vh] md:h-[80vh] rounded-xl overflow-hidden mb-12"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7 }}
+      >
         {/* Video background for all devices, fallback image if video fails */}
         <div className="absolute inset-0 w-full h-full">
           <video
@@ -53,7 +59,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Featured Vehicles */}
       <FeaturedVehicles />
@@ -62,7 +68,13 @@ export default function Home() {
       <VehicleCategories />
 
       {/* Testimonials */}
-      <section className="mb-16">
+      <motion.section
+        className="mb-16"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.7 }}
+      >
         <h2 className="text-3xl font-bold mb-8">What Our Customers Say</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
@@ -99,10 +111,16 @@ export default function Home() {
             </div>
           ))}
         </div>
-      </section>
+      </motion.section>
 
       {/* Services Section */}
-      <section className="py-12 md:py-16 bg-gray-50">
+      <motion.section
+        className="py-12 md:py-16 bg-gray-50"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.7 }}
+      >
         <div className="container mx-auto px-4">
           <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center">Our Services</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
@@ -160,10 +178,16 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* CTA Section */}
-      <section className="py-12 md:py-16">
+      <motion.section
+        className="py-12 md:py-16"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.7 }}
+      >
         <div className="container mx-auto px-4">
           <div className="bg-green-600 rounded-xl p-6 md:p-12 text-white">
             <div className="max-w-3xl mx-auto text-center">
@@ -182,7 +206,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       <section className="container mx-auto px-4 py-16">
       </section>
