@@ -26,7 +26,7 @@ export default async function FeaturedVehiclesPage() {
         </a>
       </div>
       
-      <FeaturedVehiclesList vehicles={vehicles} />
+      <div>No featured vehicles to display. (Supabase integration removed)</div>
     </div>
   );
 } 
