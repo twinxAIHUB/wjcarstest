@@ -23,21 +23,14 @@ export default function EditFeaturedVehicle({ params }: { params: { id: string }
   });
 
   useEffect(() => {
-    const fetchVehicle = async () => {
-      // Removed: const supabase = createClientComponentClient();
-      // Removed: const { data, error } = await supabase
-      // Removed: .from('featured_vehicles')
-      // Removed: .select('*')
-      // Removed: .eq('id', params.id)
-      // Removed: .single();
+    // Removed: const supabase = createClientComponentClient();
+    // Removed: const { data, error } = await supabase
+    // Removed: .from('featured_vehicles')
+    // Removed: .select('*')
+    // Removed: .eq('id', params.id)
+    // Removed: .single();
 
-      if (data) {
-        setFormData(data);
-      }
-      setLoading(false);
-    };
-
-    fetchVehicle();
+    setLoading(false);
   }, [params.id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
