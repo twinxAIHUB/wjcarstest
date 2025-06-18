@@ -1,13 +1,9 @@
+'use client';
 import { Metadata } from 'next';
 import AdminLoginForm from '@/components/admin/AdminLoginForm';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-
-export const metadata: Metadata = {
-  title: 'Admin Login',
-  description: 'Login to access the admin dashboard',
-};
 
 export default function AdminLoginPage() {
   const { user, loading } = useAuth();
