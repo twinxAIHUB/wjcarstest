@@ -26,7 +26,12 @@ export default function VehiclesPage() {
       router.push('/admin/login');
       return;
     }
-    
+    // TEMPORARY: Allow access even if email is not verified
+    // if (user && !user.emailVerified) {
+    //   toast.error('Please verify your email to access the admin panel.');
+    //   router.push('/admin/login');
+    //   return;
+    // }
     if (user) {
       fetchVehicles();
     }

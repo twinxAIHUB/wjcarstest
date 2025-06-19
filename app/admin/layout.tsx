@@ -6,6 +6,10 @@ import { usePathname } from 'next/navigation'
 import { auth } from '@/lib/firebase'
 import { signOut } from 'firebase/auth'
 import { useRouter } from 'next/navigation'
+import { useSessionTimeout } from '@/hooks/use-session-timeout'
+import SessionStatus from '@/components/admin/SessionStatus'
+import SessionTest from '@/components/admin/SessionTest'
+import { getSessionConfig } from '@/lib/config/session'
 import {
   HomeIcon,
   ChartBarIcon,
@@ -29,6 +33,15 @@ export default function AdminLayout({
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const sessionConfig = getSessionConfig()
+
+  // Initialize session timeout using configuration
+  useSessionTimeout({
+    timeoutMinutes: sessionConfig.DEFAULT_TIMEOUT_MINUTES,
+    warningMinutes: sessionConfig.WARNING_MINUTES,
+    enableTabCloseDetection: sessionConfig.ENABLE_TAB_CLOSE_DETECTION,
+    enableActivityTracking: sessionConfig.ENABLE_ACTIVITY_TRACKING
+  });
 
   const handleSignOut = async () => {
     try {
@@ -97,6 +110,11 @@ export default function AdminLayout({
             </nav>
           </div>
 
+          {/* Session Status */}
+          <div className="px-4 py-2 border-t border-gray-200">
+            <SessionStatus showWarning={true} />
+          </div>
+
           {/* Logout button */}
           <div className="p-4 border-t border-gray-200">
             <button
@@ -130,6 +148,9 @@ export default function AdminLayout({
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
+
+      {/* Session Test Component (Development Only) */}
+      {process.env.NODE_ENV === 'development' && <SessionTest />}
     </div>
   )
 } 
