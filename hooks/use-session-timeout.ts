@@ -23,8 +23,8 @@ export function useSessionTimeout(options: UseSessionTimeoutOptions = {}) {
   } = options;
 
   const router = useRouter();
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const warningRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<number | null>(null);
+  const warningRef = useRef<number | null>(null);
   const lastActivityRef = useRef<number>(Date.now());
 
   const timeoutMs = timeoutMinutes * 60 * 1000;
@@ -44,12 +44,12 @@ export function useSessionTimeout(options: UseSessionTimeoutOptions = {}) {
     lastActivityRef.current = Date.now();
 
     // Set warning timeout
-    warningRef.current = setTimeout(() => {
+    warningRef.current = window.setTimeout(() => {
       showWarningDialog();
     }, timeoutMs - warningMs);
 
     // Set logout timeout
-    timeoutRef.current = setTimeout(() => {
+    timeoutRef.current = window.setTimeout(() => {
       handleLogout();
     }, timeoutMs);
   }, [timeoutMs, warningMs]);

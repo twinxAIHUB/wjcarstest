@@ -258,42 +258,61 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
       <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
       
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="mx-auto max-w-4xl rounded bg-white p-6 w-full max-h-[90vh] overflow-y-auto">
-          <div className="flex items-center justify-between mb-4">
-            <Dialog.Title className="text-lg font-medium">
+        <Dialog.Panel className="mx-auto max-w-5xl rounded-xl bg-white p-8 w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+          <div className="flex items-center justify-between mb-6">
+            <Dialog.Title className="text-2xl font-bold text-gray-900">
               {vehicle ? 'Edit Vehicle' : 'Add New Vehicle'}
             </Dialog.Title>
             <button
               type="button"
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-500"
+              className="text-gray-400 hover:text-gray-500 transition-colors"
             >
               <XMarkIcon className="h-6 w-6" />
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-8">
             {/* Basic Information */}
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-lg font-medium mb-4">Basic Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+              <h3 className="text-xl font-semibold mb-6 text-gray-900">Basic Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div>
-                  <label htmlFor="brand" className="block text-sm font-medium text-gray-700">
-                    Brand
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                    Vehicle Name
                   </label>
                   <input
                     type="text"
-                    id="brand"
-                    name="brand"
-                    value={formData.brand}
+                    id="name"
+                    name="name"
+                    value={formData.name}
                     onChange={handleChange}
                     required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                    placeholder="Enter brand name"
+                    className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-colors"
+                    placeholder="Enter vehicle name"
                   />
                 </div>
+
                 <div>
-                  <label htmlFor="price" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-2">
+                    Year
+                  </label>
+                  <input
+                    type="number"
+                    id="year"
+                    name="year"
+                    value={formData.year}
+                    onChange={handleChange}
+                    required
+                    min="1900"
+                    max={new Date().getFullYear() + 1}
+                    className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-colors"
+                    placeholder="Enter year"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
                     Price
                   </label>
                   <input
@@ -304,12 +323,13 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
                     onChange={handleChange}
                     required
                     min="0"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-colors"
                     placeholder="Enter price"
                   />
                 </div>
+
                 <div>
-                  <label htmlFor="mileage" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="mileage" className="block text-sm font-medium text-gray-700 mb-2">
                     Miles
                   </label>
                   <input
@@ -320,12 +340,13 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
                     onChange={handleChange}
                     required
                     min="0"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-colors"
                     placeholder="Enter mileage"
                   />
                 </div>
+
                 <div>
-                  <label htmlFor="bodyStyle" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="bodyStyle" className="block text-sm font-medium text-gray-700 mb-2">
                     Body Style
                   </label>
                   <select
@@ -334,7 +355,7 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
                     value={formData.bodyStyle}
                     onChange={handleChange}
                     required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-colors"
                   >
                     <option value="">Select Body Style</option>
                     <option value="Sedan">Sedan</option>
@@ -342,26 +363,14 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
                     <option value="SUV">SUV</option>
                     <option value="Convertible">Convertible</option>
                     <option value="Wagon">Wagon</option>
+                    <option value="Pick-up">Pick-up</option>
+                    <option value="Van">Van</option>
+                    <option value="Offroad">Offroad</option>
                   </select>
                 </div>
 
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                    Vehicle Name
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="fuelType" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="fuelType" className="block text-sm font-medium text-gray-700 mb-2">
                     Fuel Type
                   </label>
                   <select
@@ -370,7 +379,7 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
                     value={formData.fuelType}
                     onChange={handleChange}
                     required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-colors"
                   >
                     <option value="">Select Fuel Type</option>
                     <option value="Gasoline">Gasoline</option>
@@ -381,7 +390,7 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
                 </div>
 
                 <div>
-                  <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
                     Status
                   </label>
                   <select
@@ -390,7 +399,7 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
                     value={formData.status}
                     onChange={handleChange}
                     required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-colors"
                   >
                     <option value="available">Available</option>
                     <option value="sold">Sold</option>
@@ -399,7 +408,7 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
                 </div>
               </div>
 
-              <div className="mt-4 flex items-center">
+              <div className="mt-6 flex items-center">
                 <input
                   type="checkbox"
                   id="featured"
@@ -408,13 +417,13 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
                   onChange={(e) => setFormData(prev => ({ ...prev, featured: e.target.checked }))}
                   className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                 />
-                <label htmlFor="featured" className="ml-2 block text-sm text-gray-900">
+                <label htmlFor="featured" className="ml-3 block text-sm text-gray-900">
                   Feature this vehicle on the homepage
                 </label>
               </div>
 
-              <div className="mt-4">
-                <label htmlFor="overview" className="block text-sm font-medium text-gray-700">
+              <div className="mt-6">
+                <label htmlFor="overview" className="block text-sm font-medium text-gray-700 mb-2">
                   Vehicle Overview
                 </label>
                 <textarea
@@ -423,17 +432,17 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
                   value={formData.overview}
                   onChange={handleChange}
                   rows={4}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-colors"
                   placeholder="Provide a brief overview of the vehicle..."
                 />
               </div>
             </div>
 
             {/* Images Section */}
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-lg font-medium mb-4">Vehicle Images</h3>
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+              <h3 className="text-xl font-semibold mb-6 text-gray-900">Vehicle Images</h3>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-3">
                   Upload Images
                 </label>
                 <input
@@ -441,26 +450,26 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
                   accept="image/*"
                   multiple
                   onChange={handleImageChange}
-                  className="mt-1 block w-full text-sm text-gray-500
-                    file:mr-4 file:py-2 file:px-4
-                    file:rounded-md file:border-0
+                  className="block w-full text-sm text-gray-500
+                    file:mr-4 file:py-3 file:px-4
+                    file:rounded-lg file:border-0
                     file:text-sm file:font-semibold
                     file:bg-indigo-50 file:text-indigo-700
-                    hover:file:bg-indigo-100"
+                    hover:file:bg-indigo-100 transition-colors"
                 />
               </div>
               
               {previewUrls.length > 0 && (
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="mt-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
                     Select Highlight Image
                   </label>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                     {previewUrls.map((url, index) => (
                       <div
                         key={index}
-                        className={`relative cursor-pointer border-2 rounded-lg overflow-hidden
-                          ${index === highlightImageIndex ? 'border-indigo-500' : 'border-gray-200'}`}
+                        className={`relative cursor-pointer border-2 rounded-lg overflow-hidden transition-all duration-200
+                          ${index === highlightImageIndex ? 'border-indigo-500 shadow-lg' : 'border-gray-200 hover:border-indigo-300'}`}
                         onClick={() => handleHighlightImageChange(index)}
                       >
                         <img
@@ -469,14 +478,14 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
                           className="h-24 w-full object-cover"
                         />
                         {index === highlightImageIndex && (
-                          <div className="absolute top-2 right-2 bg-indigo-500 text-white text-xs px-2 py-1 rounded">
+                          <div className="absolute top-2 right-2 bg-indigo-500 text-white text-xs px-2 py-1 rounded-lg">
                             Main
                           </div>
                         )}
                         <button
                           type="button"
                           onClick={e => { e.stopPropagation(); handleRemoveImage(index); }}
-                          className="absolute top-2 left-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-700"
+                          className="absolute top-2 left-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-700 transition-colors"
                           title="Remove image"
                         >
                           <XMarkIcon className="h-4 w-4" />
@@ -489,21 +498,21 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
             </div>
 
             {/* Features Section */}
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-lg font-medium mb-4">Features</h3>
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+              <h3 className="text-xl font-semibold mb-6 text-gray-900">Features</h3>
               <div className="space-y-4">
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <input
                     type="text"
                     value={newFeature}
                     onChange={(e) => setNewFeature(e.target.value)}
                     placeholder="Add a feature"
-                    className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-colors"
                   />
                   <button
                     type="button"
                     onClick={handleFeatureAdd}
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                    className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
                   >
                     Add
                   </button>
@@ -511,12 +520,12 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
                 
                 <div className="space-y-2">
                   {features.map((feature, index) => (
-                    <div key={index} className="flex items-center justify-between bg-white p-2 rounded-md">
-                      <span>{feature}</span>
+                    <div key={index} className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200">
+                      <span className="text-gray-700">{feature}</span>
                       <button
                         type="button"
                         onClick={() => handleFeatureRemove(index)}
-                        className="text-red-500 hover:text-red-700"
+                        className="text-red-500 hover:text-red-700 transition-colors"
                       >
                         <XMarkIcon className="h-5 w-5" />
                       </button>
@@ -527,11 +536,11 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
             </div>
 
             {/* Specifications Section */}
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-lg font-medium mb-4">Specifications</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+              <h3 className="text-xl font-semibold mb-6 text-gray-900">Specifications</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div>
-                  <label htmlFor="specifications.engine" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="specifications.engine" className="block text-sm font-medium text-gray-700 mb-2">
                     Engine
                   </label>
                   <input
@@ -540,12 +549,12 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
                     name="specifications.engine"
                     value={formData.specifications.engine}
                     onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="specifications.horsepower" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="specifications.horsepower" className="block text-sm font-medium text-gray-700 mb-2">
                     Horsepower
                   </label>
                   <input
@@ -554,12 +563,12 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
                     name="specifications.horsepower"
                     value={formData.specifications.horsepower}
                     onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="specifications.torque" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="specifications.torque" className="block text-sm font-medium text-gray-700 mb-2">
                     Torque
                   </label>
                   <input
@@ -568,12 +577,12 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
                     name="specifications.torque"
                     value={formData.specifications.torque}
                     onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="specifications.seatingCapacity" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="specifications.seatingCapacity" className="block text-sm font-medium text-gray-700 mb-2">
                     Seating Capacity
                   </label>
                   <input
@@ -582,18 +591,18 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
                     name="specifications.seatingCapacity"
                     value={formData.specifications.seatingCapacity}
                     onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-colors"
                   />
                 </div>
               </div>
             </div>
 
             {/* Vehicle History Section */}
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-lg font-medium mb-4">Vehicle History</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+              <h3 className="text-xl font-semibold mb-6 text-gray-900">Vehicle History</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div>
-                  <label htmlFor="history.title" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="history.title" className="block text-sm font-medium text-gray-700 mb-2">
                     Title Status
                   </label>
                   <select
@@ -601,7 +610,7 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
                     name="history.title"
                     value={formData.history.title}
                     onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-colors"
                   >
                     <option value="clean">Clean</option>
                     <option value="salvage">Salvage</option>
@@ -610,7 +619,7 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
                 </div>
 
                 <div>
-                  <label htmlFor="history.previousOwners" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="history.previousOwners" className="block text-sm font-medium text-gray-700 mb-2">
                     Previous Owners
                   </label>
                   <input
@@ -620,12 +629,12 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
                     value={formData.history.previousOwners}
                     onChange={handleChange}
                     min="0"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="history.lastService" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="history.lastService" className="block text-sm font-medium text-gray-700 mb-2">
                     Last Service Date
                   </label>
                   <input
@@ -634,25 +643,25 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
                     name="history.lastService"
                     value={formData.history.lastService.split('T')[0]}
                     onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-colors"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="mt-6 flex justify-end space-x-3">
+            <div className="mt-8 flex justify-end space-x-4">
               <button
                 type="button"
                 onClick={onClose}
                 disabled={isUploading}
-                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                className="rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isUploading}
-                className="rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                className="rounded-lg border border-transparent bg-indigo-600 px-6 py-3 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
               >
                 {isUploading ? 'Uploading...' : vehicle ? 'Save Changes' : 'Add Vehicle'}
               </button>

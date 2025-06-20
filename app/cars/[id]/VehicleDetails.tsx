@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { doc, getDoc } from 'firebase/firestore';
@@ -11,9 +11,8 @@ import { toast } from 'sonner';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Star, Calendar, MapPin, Settings, Users } from 'lucide-react';
 import SimilarCars from '@/components/similar-cars';
-import { Star } from 'lucide-react';
 import type { Vehicle } from '@/types/vehicle';
 
 interface VehicleDetailsProps {
@@ -24,6 +23,7 @@ export default function VehicleDetails({ id }: VehicleDetailsProps) {
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<string>('');
+  const [imageLoading, setImageLoading] = useState(true);
   const [contactForm, setContactForm] = useState({
     name: '',
     email: '',
@@ -31,16 +31,21 @@ export default function VehicleDetails({ id }: VehicleDetailsProps) {
     message: ''
   });
 
+  // Memoize vehicle data to prevent unnecessary re-renders
+  const vehicleData = useMemo(() => vehicle, [vehicle]);
+
   useEffect(() => {
     const fetchVehicle = async () => {
       try {
+        setIsLoading(true);
         const docRef = doc(db, 'vehicles', id);
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
           const vehicleData = { id: docSnap.id, ...docSnap.data() } as Vehicle;
           setVehicle(vehicleData);
-          setSelectedImage(vehicleData.images[0]);
+          // Set the first image as selected, or highlight image if available
+          setSelectedImage(vehicleData.highlightImage || vehicleData.images?.[0] || '');
         } else {
           toast.error('Vehicle not found');
         }
@@ -68,10 +73,17 @@ export default function VehicleDetails({ id }: VehicleDetailsProps) {
     });
   };
 
+  const handleImageLoad = () => {
+    setImageLoading(false);
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-indigo-600" />
+          <p className="text-gray-600">Loading vehicle details...</p>
+        </div>
       </div>
     );
   }
@@ -79,62 +91,84 @@ export default function VehicleDetails({ id }: VehicleDetailsProps) {
   if (!vehicle) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
-        <h1 className="text-2xl font-bold mb-4">Vehicle Not Found</h1>
-        <Button asChild>
-          <Link href="/cars">Back to Listings</Link>
-        </Button>
+        <div className="text-center">
+          <h1 className="text-3xl font-bold mb-4 text-gray-900">Vehicle Not Found</h1>
+          <p className="text-gray-600 mb-6">The vehicle you're looking for doesn't exist or has been removed.</p>
+          <Button asChild className="bg-indigo-600 hover:bg-indigo-700">
+            <Link href="/cars">Back to Listings</Link>
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-        <Link href="/">Home</Link>
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-2 text-sm text-gray-500 mb-8">
+        <Link href="/" className="hover:text-indigo-600 transition-colors">Home</Link>
         <span>/</span>
-        <Link href="/cars">Cars</Link>
+        <Link href="/cars" className="hover:text-indigo-600 transition-colors">Cars</Link>
         <span>/</span>
-        <span className="text-gray-900">{vehicle.name}</span>
+        <span className="text-gray-900 font-medium">{vehicle.name}</span>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
         {/* Left Column - Images */}
         <div className="lg:col-span-2">
-          <div className="relative aspect-[16/10] rounded-lg overflow-hidden mb-4">
+          {/* Main Image */}
+          <div className="relative aspect-[16/10] rounded-xl overflow-hidden mb-6 bg-gray-100">
+            {imageLoading && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+              </div>
+            )}
             <Image
-              src={selectedImage}
+              src={selectedImage || '/placeholder.svg'}
               alt={vehicle.name}
               fill
-              className="object-cover"
+              className="object-cover transition-opacity duration-300"
               priority
+              onLoad={handleImageLoad}
+              sizes="(max-width: 1024px) 100vw, 66vw"
             />
-          </div>
-          <div className="grid grid-cols-5 gap-4">
-            {vehicle.images?.map((image, index) => (
-              <button
-                key={index}
-                onClick={() => setSelectedImage(image)}
-                className={`relative aspect-square rounded-lg overflow-hidden transition-all ${
-                  selectedImage === image 
-                    ? 'ring-2 ring-green-500 scale-95'
-                    : 'hover:ring-2 hover:ring-green-500/50'
-                }`}
-              >
-                <Image
-                  src={image}
-                  alt={`${vehicle.name} - Image ${index + 1}`}
-                  fill
-                  className="object-cover"
-                />
-              </button>
-            ))}
+            {vehicle.featured && (
+              <div className="absolute top-4 left-4 bg-indigo-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+                Featured
+              </div>
+            )}
           </div>
 
+          {/* Thumbnail Images */}
+          {vehicle.images && vehicle.images.length > 1 && (
+            <div className="grid grid-cols-5 gap-3 mb-8">
+              {vehicle.images.map((image, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSelectedImage(image)}
+                  className={`relative aspect-square rounded-lg overflow-hidden transition-all duration-200 ${
+                    selectedImage === image 
+                      ? 'ring-2 ring-indigo-500 scale-95'
+                      : 'hover:ring-2 hover:ring-indigo-300 hover:scale-105'
+                  }`}
+                >
+                  <Image
+                    src={image}
+                    alt={`${vehicle.name} - Image ${index + 1}`}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 20vw, 10vw"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* Key Details Section */}
-          <div className="mt-8">
-            <h1 className="text-3xl font-bold mb-2">{vehicle.name}</h1>
+          <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+            <h1 className="text-3xl font-bold mb-3 text-gray-900">{vehicle.name}</h1>
             <div className="flex items-center gap-4 mb-6">
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-3xl font-bold text-green-600">
                 ${vehicle.price.toLocaleString()}
               </div>
               {vehicle.rating && (
@@ -145,22 +179,35 @@ export default function VehicleDetails({ id }: VehicleDetailsProps) {
               )}
             </div>
 
+            {/* Vehicle Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               <div className="p-4 bg-gray-50 rounded-lg text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <MapPin className="h-5 w-5 text-gray-400" />
+                </div>
                 <div className="text-sm text-gray-500 mb-1">Mileage</div>
-                <div className="font-semibold">{vehicle.mileage.toLocaleString()} miles</div>
+                <div className="font-semibold text-gray-900">{vehicle.mileage.toLocaleString()} miles</div>
               </div>
               <div className="p-4 bg-gray-50 rounded-lg text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Calendar className="h-5 w-5 text-gray-400" />
+                </div>
                 <div className="text-sm text-gray-500 mb-1">Year</div>
-                <div className="font-semibold">{vehicle.year}</div>
+                <div className="font-semibold text-gray-900">{vehicle.year}</div>
               </div>
               <div className="p-4 bg-gray-50 rounded-lg text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Settings className="h-5 w-5 text-gray-400" />
+                </div>
                 <div className="text-sm text-gray-500 mb-1">Body Style</div>
-                <div className="font-semibold">{vehicle.bodyStyle}</div>
+                <div className="font-semibold text-gray-900">{vehicle.bodyStyle}</div>
               </div>
               <div className="p-4 bg-gray-50 rounded-lg text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Users className="h-5 w-5 text-gray-400" />
+                </div>
                 <div className="text-sm text-gray-500 mb-1">Transmission</div>
-                <div className="font-semibold">{vehicle.transmission}</div>
+                <div className="font-semibold text-gray-900">{vehicle.transmission}</div>
               </div>
             </div>
           </div>
@@ -168,8 +215,8 @@ export default function VehicleDetails({ id }: VehicleDetailsProps) {
 
         {/* Right Column - Contact Form */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg p-6 border">
-            <h2 className="text-2xl font-bold mb-6">Contact Seller</h2>
+          <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm sticky top-8">
+            <h2 className="text-2xl font-bold mb-6 text-gray-900">Contact Seller</h2>
             <form onSubmit={handleContactSubmit} className="space-y-4">
               <div>
                 <Input
@@ -178,6 +225,7 @@ export default function VehicleDetails({ id }: VehicleDetailsProps) {
                   value={contactForm.name}
                   onChange={(e) => setContactForm(prev => ({ ...prev, name: e.target.value }))}
                   required
+                  className="rounded-lg"
                 />
               </div>
               <div>
@@ -187,6 +235,7 @@ export default function VehicleDetails({ id }: VehicleDetailsProps) {
                   value={contactForm.email}
                   onChange={(e) => setContactForm(prev => ({ ...prev, email: e.target.value }))}
                   required
+                  className="rounded-lg"
                 />
               </div>
               <div>
@@ -196,6 +245,7 @@ export default function VehicleDetails({ id }: VehicleDetailsProps) {
                   value={contactForm.phone}
                   onChange={(e) => setContactForm(prev => ({ ...prev, phone: e.target.value }))}
                   required
+                  className="rounded-lg"
                 />
               </div>
               <div>
@@ -205,9 +255,10 @@ export default function VehicleDetails({ id }: VehicleDetailsProps) {
                   onChange={(e) => setContactForm(prev => ({ ...prev, message: e.target.value }))}
                   required
                   rows={4}
+                  className="rounded-lg"
                 />
               </div>
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 rounded-lg">
                 Send Message
               </Button>
             </form>

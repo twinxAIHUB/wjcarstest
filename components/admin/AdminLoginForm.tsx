@@ -139,16 +139,6 @@ export default function AdminLoginForm() {
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <button
-          type="button"
-          onClick={() => setMode(mode === 'login' ? 'create' : 'login')}
-          className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
-        >
-          {mode === 'login' ? 'Create new admin account' : 'Back to login'}
-        </button>
-      </div>
-
       <div>
         <button
           type="submit"

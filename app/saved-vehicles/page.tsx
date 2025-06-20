@@ -3,38 +3,56 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { cars } from "@/lib/data"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Star, Heart, ArrowLeft } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
+import { collection, getDocs } from 'firebase/firestore'
+import { db } from '@/lib/firebase'
+import type { Vehicle } from '@/types/vehicle'
 
 export default function SavedVehiclesPage() {
-  const [savedCars, setSavedCars] = useState<typeof cars>([])
+  const [savedCars, setSavedCars] = useState<Vehicle[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Get saved car IDs from localStorage
-    const savedCarIds = JSON.parse(localStorage.getItem("savedCars") || "[]")
+    const fetchSavedVehicles = async () => {
+      try {
+        const savedCarIds = JSON.parse(localStorage.getItem("savedCars") || "[]")
+        if (savedCarIds.length === 0) {
+          setSavedCars([])
+          setIsLoading(false)
+          return
+        }
 
-    // Filter cars based on saved IDs
-    const filteredCars = cars.filter((car) => savedCarIds.includes(car.id))
-    setSavedCars(filteredCars)
-    setIsLoading(false)
+        const vehiclesRef = collection(db, 'vehicles')
+        const snapshot = await getDocs(vehiclesRef)
+        const allVehicles = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Vehicle[]
+        
+        const filteredCars = allVehicles.filter((car) => savedCarIds.includes(car.id))
+        setSavedCars(filteredCars)
+      } catch (error) {
+        console.error("Error fetching saved vehicles:", error)
+        toast({
+          title: "Error",
+          description: "Could not load saved vehicles.",
+          variant: "destructive"
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchSavedVehicles()
   }, [])
 
   const removeCar = (carId: string, carName: string) => {
-    // Get current saved cars
     const savedCarIds = JSON.parse(localStorage.getItem("savedCars") || "[]")
-
-    // Remove the car
     const updatedSavedCarIds = savedCarIds.filter((id: string) => id !== carId)
     localStorage.setItem("savedCars", JSON.stringify(updatedSavedCarIds))
 
-    // Update state
     setSavedCars(savedCars.filter((car) => car.id !== carId))
 
-    // Show toast
     toast({
       title: "Removed from favorites",
       description: `${carName} has been removed from your favorites.`,
@@ -84,16 +102,14 @@ export default function SavedVehiclesPage() {
               <Link href={`/cars/${car.id}`} className="block">
                 <div className="relative h-56 overflow-hidden">
                   <Image
-                    src={car.images[0] || "/placeholder.svg"}
-                    alt={car.make + " " + car.model}
+                    src={car.imageUrl || "/placeholder.svg"}
+                    alt={car.name}
                     fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   {car.featured && (
                     <Badge className="absolute top-3 left-3 bg-green-600 hover:bg-green-700">Featured</Badge>
-                  )}
-                  {car.condition === "New" && (
-                    <Badge className="absolute top-3 right-3 bg-blue-600 hover:bg-blue-700">New</Badge>
                   )}
                 </div>
               </Link>
@@ -101,12 +117,12 @@ export default function SavedVehiclesPage() {
                 <div className="flex justify-between items-start mb-2">
                   <Link href={`/cars/${car.id}`} className="block">
                     <h3 className="font-bold text-lg group-hover:text-green-600 transition-colors">
-                      {car.year} {car.make} {car.model}
+                      {car.name}
                     </h3>
                   </Link>
                   <p className="font-bold text-green-600">${car.price.toLocaleString()}</p>
                 </div>
-                <p className="text-gray-500 text-sm mb-3">{car.shortDescription}</p>
+                <p className="text-gray-500 text-sm mb-3">{car.overview}</p>
                 <div className="flex justify-between items-center">
                   <div className="flex items-center text-sm text-gray-600">
                     <Star className="h-4 w-4 text-yellow-500 mr-1 fill-yellow-500" />
@@ -116,7 +132,7 @@ export default function SavedVehiclesPage() {
                     variant="ghost"
                     size="sm"
                     className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                    onClick={() => removeCar(car.id, `${car.year} ${car.make} ${car.model}`)}
+                    onClick={() => removeCar(car.id, car.name)}
                   >
                     <Heart className="h-4 w-4 mr-1 fill-red-500" /> Remove
                   </Button>

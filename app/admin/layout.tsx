@@ -17,25 +17,26 @@ import {
   TruckIcon,
   ArrowLeftOnRectangleIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  UserGroupIcon,
+  StarIcon,
+  DocumentTextIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
+  { name: 'Dashboard', href: '/admin', icon: HomeIcon },
   { name: 'Vehicle Management', href: '/admin/vehicles', icon: TruckIcon },
+  { name: 'Documentation', href: '/admin/documentation', icon: DocumentTextIcon },
+  { name: 'Settings', href: '/admin/settings', icon: CogIcon },
 ]
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+function ProtectedAdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const sessionConfig = getSessionConfig()
 
-  // Initialize session timeout using configuration
   useSessionTimeout({
     timeoutMinutes: sessionConfig.DEFAULT_TIMEOUT_MINUTES,
     warningMinutes: sessionConfig.WARNING_MINUTES,
@@ -56,12 +57,12 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-50">
       {/* Mobile menu button */}
       <div className="lg:hidden fixed top-4 left-4 z-50">
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="p-2 rounded-md bg-white shadow-md"
+          className="p-3 rounded-lg bg-white shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors"
         >
           {isSidebarOpen ? (
             <XMarkIcon className="h-6 w-6 text-gray-600" />
@@ -72,33 +73,38 @@ export default function AdminLayout({
       </div>
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 ease-in-out lg:translate-x-0 ${
-        isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } lg:static lg:inset-auto lg:z-auto z-40`}>
+      <div
+        className={`fixed inset-y-0 left-0 w-72 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out z-40 shadow-lg 
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          lg:translate-x-0`}
+      >
         <div className="flex flex-col h-full">
           <div className="flex-1">
             {/* Logo */}
-            <div className="flex items-center h-16 px-4 border-b border-gray-200">
-              <span className="text-xl font-semibold text-gray-800">Admin Panel</span>
+            <div className="flex items-center h-20 px-6 border-b border-gray-200 bg-gradient-to-r from-indigo-600 to-purple-600">
+              <div className="flex items-center">
+                <TruckIcon className="h-8 w-8 text-white mr-3" />
+                <span className="text-xl font-bold text-white">Admin Panel</span>
+              </div>
             </div>
 
             {/* Navigation */}
-            <nav className="px-4 mt-6 space-y-1">
+            <nav className="px-4 mt-8 space-y-2">
               {navigation.map((item) => {
                 const isActive = pathname === item.href
                 return (
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`flex items-center px-2 py-2 text-sm font-medium rounded-md group ${
+                    className={`flex items-center px-4 py-3 text-sm font-medium rounded-xl group transition-all duration-200 ${
                       isActive
-                        ? 'bg-indigo-50 text-indigo-600'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-sm'
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:shadow-sm'
                     }`}
                     onClick={() => setIsSidebarOpen(false)}
                   >
                     <item.icon
-                      className={`mr-3 h-6 w-6 ${
+                      className={`mr-4 h-5 w-5 transition-colors ${
                         isActive ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-500'
                       }`}
                       aria-hidden="true"
@@ -111,7 +117,7 @@ export default function AdminLayout({
           </div>
 
           {/* Session Status */}
-          <div className="px-4 py-2 border-t border-gray-200">
+          <div className="px-4 py-4 border-t border-gray-200 bg-gray-50">
             <SessionStatus showWarning={true} />
           </div>
 
@@ -120,10 +126,10 @@ export default function AdminLayout({
             <button
               onClick={handleSignOut}
               disabled={isLoading}
-              className="flex items-center w-full px-2 py-2 text-sm font-medium text-red-600 rounded-md hover:bg-red-50 group"
+              className="flex items-center w-full px-4 py-3 text-sm font-medium text-red-600 rounded-xl hover:bg-red-50 group transition-all duration-200"
             >
               <ArrowLeftOnRectangleIcon
-                className="w-6 h-6 mr-3 text-red-400 group-hover:text-red-500"
+                className="w-5 h-5 mr-4 text-red-400 group-hover:text-red-500 transition-colors"
                 aria-hidden="true"
               />
               {isLoading ? 'Signing out...' : 'Sign out'}
@@ -133,9 +139,9 @@ export default function AdminLayout({
       </div>
 
       {/* Main content */}
-      <div className="lg:pl-64">
-        <main className="py-6">
-          <div className="px-4 mx-auto max-w-7xl sm:px-6 md:px-8">
+      <div className="lg:pl-72">
+        <main className="py-8">
+          <div className="px-6 mx-auto max-w-7xl lg:px-8">
             {children}
           </div>
         </main>
@@ -153,4 +159,22 @@ export default function AdminLayout({
       {process.env.NODE_ENV === 'development' && <SessionTest />}
     </div>
   )
+}
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const pathname = usePathname()
+
+  if (pathname === '/admin/login') {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        {children}
+      </div>
+    )
+  }
+
+  return <ProtectedAdminLayout>{children}</ProtectedAdminLayout>
 } 
