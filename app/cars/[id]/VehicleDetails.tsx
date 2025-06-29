@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { doc, getDoc } from 'firebase/firestore';
@@ -19,11 +19,21 @@ interface VehicleDetailsProps {
   id: string;
 }
 
+// Preload critical images
+const preloadImage = (src: string) => {
+  const link = document.createElement('link');
+  link.rel = 'preload';
+  link.as = 'image';
+  link.href = src;
+  document.head.appendChild(link);
+};
+
 export default function VehicleDetails({ id }: VehicleDetailsProps) {
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<string>('');
   const [imageLoading, setImageLoading] = useState(true);
+  const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
   const [contactForm, setContactForm] = useState({
     name: '',
     email: '',
@@ -31,8 +41,20 @@ export default function VehicleDetails({ id }: VehicleDetailsProps) {
     message: ''
   });
 
+  // Refs for intersection observer
+  const thumbnailRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
   // Memoize vehicle data to prevent unnecessary re-renders
   const vehicleData = useMemo(() => vehicle, [vehicle]);
+
+  // Preload critical images when vehicle data is available
+  useEffect(() => {
+    if (vehicle?.images && vehicle.images.length > 0) {
+      // Preload the first 2 images (main image and first thumbnail)
+      const criticalImages = vehicle.images.slice(0, 2);
+      criticalImages.forEach(preloadImage);
+    }
+  }, [vehicle?.images]);
 
   useEffect(() => {
     const fetchVehicle = async () => {
@@ -45,7 +67,13 @@ export default function VehicleDetails({ id }: VehicleDetailsProps) {
           const vehicleData = { id: docSnap.id, ...docSnap.data() } as Vehicle;
           setVehicle(vehicleData);
           // Set the first image as selected, or highlight image if available
-          setSelectedImage(vehicleData.highlightImage || vehicleData.images?.[0] || '');
+          const initialImage = vehicleData.highlightImage || vehicleData.images?.[0] || '';
+          setSelectedImage(initialImage);
+          
+          // Preload the initial image immediately
+          if (initialImage) {
+            preloadImage(initialImage);
+          }
         } else {
           toast.error('Vehicle not found');
         }
@@ -62,6 +90,41 @@ export default function VehicleDetails({ id }: VehicleDetailsProps) {
     }
   }, [id]);
 
+  // Intersection observer for lazy loading thumbnails
+  useEffect(() => {
+    if (!vehicle?.images || vehicle.images.length <= 2) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const imgSrc = entry.target.getAttribute('data-src');
+            if (imgSrc && !loadedImages.has(imgSrc)) {
+              // Load the image when it comes into view
+              const img = new window.Image();
+              img.onload = () => {
+                setLoadedImages(prev => new Set(prev).add(imgSrc));
+              };
+              img.src = imgSrc;
+            }
+          }
+        });
+      },
+      {
+        rootMargin: '50px', // Start loading 50px before the image comes into view
+        threshold: 0.1
+      }
+    );
+
+    thumbnailRefs.current.forEach((ref) => {
+      if (ref) {
+        observer.observe(ref);
+      }
+    });
+
+    return () => observer.disconnect();
+  }, [vehicle?.images, loadedImages]);
+
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     toast.success('Your message has been sent! We will contact you shortly.');
@@ -73,9 +136,14 @@ export default function VehicleDetails({ id }: VehicleDetailsProps) {
     });
   };
 
-  const handleImageLoad = () => {
+  const handleImageLoad = useCallback(() => {
     setImageLoading(false);
-  };
+  }, []);
+
+  const handleThumbnailClick = useCallback((image: string) => {
+    setSelectedImage(image);
+    setImageLoading(true);
+  }, []);
 
   if (isLoading) {
     return (
@@ -119,7 +187,7 @@ export default function VehicleDetails({ id }: VehicleDetailsProps) {
           {/* Main Image */}
           <div className="relative aspect-[16/10] rounded-xl overflow-hidden mb-6 bg-gray-100">
             {imageLoading && (
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
                 <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
               </div>
             )}
@@ -127,10 +195,15 @@ export default function VehicleDetails({ id }: VehicleDetailsProps) {
               src={selectedImage || '/placeholder.svg'}
               alt={vehicle.name}
               fill
-              className="object-cover transition-opacity duration-300"
+              className={`object-cover transition-opacity duration-300 ${
+                imageLoading ? 'opacity-0' : 'opacity-100'
+              }`}
               priority
               onLoad={handleImageLoad}
-              sizes="(max-width: 1024px) 100vw, 66vw"
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 66vw, 50vw"
+              quality={85}
+              placeholder="blur"
+              blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
             />
             {vehicle.featured && (
               <div className="absolute top-4 left-4 bg-indigo-600 text-white px-3 py-1 rounded-full text-sm font-medium">
@@ -142,25 +215,44 @@ export default function VehicleDetails({ id }: VehicleDetailsProps) {
           {/* Thumbnail Images */}
           {vehicle.images && vehicle.images.length > 1 && (
             <div className="grid grid-cols-5 gap-3 mb-8">
-              {vehicle.images.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedImage(image)}
-                  className={`relative aspect-square rounded-lg overflow-hidden transition-all duration-200 ${
-                    selectedImage === image 
-                      ? 'ring-2 ring-indigo-500 scale-95'
-                      : 'hover:ring-2 hover:ring-indigo-300 hover:scale-105'
-                  }`}
-                >
-                  <Image
-                    src={image}
-                    alt={`${vehicle.name} - Image ${index + 1}`}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 20vw, 10vw"
-                  />
-                </button>
-              ))}
+              {vehicle.images.map((image, index) => {
+                const isCritical = index < 2; // First 2 images are critical
+                const isLoaded = isCritical || loadedImages.has(image);
+                
+                return (
+                  <button
+                    key={index}
+                    ref={(el) => {
+                      if (!isCritical) {
+                        thumbnailRefs.current[index] = el;
+                      }
+                    }}
+                    data-src={!isCritical ? image : undefined}
+                    onClick={() => handleThumbnailClick(image)}
+                    className={`relative aspect-square rounded-lg overflow-hidden transition-all duration-200 ${
+                      selectedImage === image 
+                        ? 'ring-2 ring-indigo-500 scale-95'
+                        : 'hover:ring-2 hover:ring-indigo-300 hover:scale-105'
+                    }`}
+                  >
+                    {isLoaded ? (
+                      <Image
+                        src={image}
+                        alt={`${vehicle.name} - Image ${index + 1}`}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 20vw, 10vw"
+                        loading={isCritical ? 'eager' : 'lazy'}
+                        quality={75}
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">
+                        <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           )}
 
