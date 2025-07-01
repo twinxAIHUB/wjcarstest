@@ -15,13 +15,13 @@ export default function CarsPage() {
   const searchParams = useSearchParams()
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>([])
-  const [selectedMake, setSelectedMake] = useState("")
+  const [selectedName, setSelectedName] = useState("")
   const [selectedBodyStyle, setSelectedBodyStyle] = useState("")
   const [selectedSort, setSelectedSort] = useState("featured")
   const [isLoading, setIsLoading] = useState(true)
 
-  // Get unique makes and body styles for filters
-  const makes = Array.from(new Set(vehicles.map((vehicle) => vehicle.brand))).sort()
+  // Get unique names for filters
+  const names = Array.from(new Set(vehicles.map((vehicle) => vehicle.name))).sort()
   const bodyStyles = Array.from(new Set(vehicles.map((vehicle) => vehicle.bodyStyle))).sort()
 
   // Fetch vehicles from Firestore
@@ -39,6 +39,7 @@ export default function CarsPage() {
         })) as Vehicle[]
 
         setVehicles(vehiclesData)
+        // Always show all vehicles initially
         setFilteredVehicles(vehiclesData)
       } catch (error) {
         console.error("Error fetching vehicles:", error)
@@ -51,20 +52,23 @@ export default function CarsPage() {
   }, [])
 
   // Handle filter changes
-  const handleMakeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const make = e.target.value
-    setSelectedMake(make)
+  const handleNameChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const name = e.target.value
+    setSelectedName(name)
 
     let filtered = [...vehicles]
-    if (make) {
-      filtered = filtered.filter((vehicle) => vehicle.brand === make)
+    if (name) {
+      filtered = filtered.filter((vehicle) => vehicle.name === name)
     }
-
     if (selectedBodyStyle) {
       filtered = filtered.filter((vehicle) => vehicle.bodyStyle === selectedBodyStyle)
     }
-
-    setFilteredVehicles(filtered)
+    // If both are empty, show all vehicles
+    if (!name && !selectedBodyStyle) {
+      setFilteredVehicles(vehicles)
+    } else {
+      setFilteredVehicles(filtered)
+    }
   }
 
   const handleBodyStyleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -75,19 +79,22 @@ export default function CarsPage() {
     if (bodyStyle) {
       filtered = filtered.filter((vehicle) => vehicle.bodyStyle === bodyStyle)
     }
-
-    if (selectedMake) {
-      filtered = filtered.filter((vehicle) => vehicle.brand === selectedMake)
+    if (selectedName) {
+      filtered = filtered.filter((vehicle) => vehicle.name === selectedName)
     }
-
-    setFilteredVehicles(filtered)
+    // If both are empty, show all vehicles
+    if (!bodyStyle && !selectedName) {
+      setFilteredVehicles(vehicles)
+    } else {
+      setFilteredVehicles(filtered)
+    }
   }
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const sortOption = e.target.value
     setSelectedSort(sortOption)
 
-    const sorted = [...filteredVehicles]
+    let sorted = [...filteredVehicles]
 
     switch (sortOption) {
       case "Price: Low to High":
@@ -99,28 +106,33 @@ export default function CarsPage() {
       case "Newest First":
         sorted.sort((a, b) => b.year - a.year)
         break
-      default:
-        // Featured sorting (default)
+      case "Sort By: Featured":
         sorted.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0))
+        break
+      default:
+        // No sorting, keep original order
+        break
     }
 
     setFilteredVehicles(sorted)
   }
 
+  // When filters change, always check if both are empty and show all vehicles
   useEffect(() => {
     if (!vehicles.length) return;
-    let filtered = [...vehicles];
-    const bodyStyle = searchParams.get("bodyStyle");
-    const fuelType = searchParams.get("fuelType");
-    if (bodyStyle) {
-      filtered = filtered.filter((vehicle) => vehicle.bodyStyle === bodyStyle);
-      setSelectedBodyStyle(bodyStyle);
+    if (!selectedName && !selectedBodyStyle) {
+      setFilteredVehicles(vehicles);
+      return;
     }
-    if (fuelType) {
-      filtered = filtered.filter((vehicle) => vehicle.fuelType === fuelType);
+    let filtered = [...vehicles];
+    if (selectedName) {
+      filtered = filtered.filter((vehicle) => vehicle.name === selectedName);
+    }
+    if (selectedBodyStyle) {
+      filtered = filtered.filter((vehicle) => vehicle.bodyStyle === selectedBodyStyle);
     }
     setFilteredVehicles(filtered);
-  }, [vehicles, searchParams]);
+  }, [vehicles, selectedName, selectedBodyStyle]);
 
   if (isLoading) {
     return (
@@ -142,13 +154,13 @@ export default function CarsPage() {
         <div className="flex gap-2 flex-wrap">
           <select
             className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-            value={selectedMake}
-            onChange={handleMakeChange}
+            value={selectedName}
+            onChange={handleNameChange}
           >
-            <option value="">All Makes</option>
-            {makes.map((make) => (
-              <option key={make} value={make}>
-                {make}
+            <option value="">All Names</option>
+            {names.map((name) => (
+              <option key={name} value={name}>
+                {name}
               </option>
             ))}
           </select>
@@ -183,7 +195,7 @@ export default function CarsPage() {
           <p className="text-gray-600 mb-6">Try adjusting your filters or search terms to find more options.</p>
           <Button
             onClick={() => {
-              setSelectedMake("")
+              setSelectedName("")
               setSelectedBodyStyle("")
               setFilteredVehicles(vehicles)
             }}
@@ -216,7 +228,7 @@ export default function CarsPage() {
                       <h3 className="font-bold text-lg group-hover:text-green-600 transition-colors">
                         {vehicle.name}
                       </h3>
-                      <p className="text-sm text-gray-500">{vehicle.brand} · {vehicle.bodyStyle}</p>
+                      <p className="text-sm text-gray-500">{vehicle.model} · {vehicle.bodyStyle}</p>
                     </div>
                     <p className="font-bold text-green-600">${vehicle.price.toLocaleString()}</p>
                   </div>
