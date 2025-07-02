@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import type { Vehicle } from '@/types/vehicle';
+import * as XLSX from 'xlsx';
 
 const VEHICLES_PER_PAGE = 20;
 
@@ -25,6 +26,9 @@ export default function VehiclesPage() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [lastDoc, setLastDoc] = useState<any>(null);
   const [hasMore, setHasMore] = useState(true);
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+  const [bulkUploading, setBulkUploading] = useState(false);
+  const [bulkResult, setBulkResult] = useState<{ success: number; failed: number; errors: string[] }>({ success: 0, failed: 0, errors: [] });
 
   useEffect(() => {
     if (!loading && !user) {
@@ -220,6 +224,90 @@ export default function VehiclesPage() {
 
   const filteredVehicles = vehicles.filter(tabs[selectedTab].filter);
 
+  // Bulk upload handler
+  const handleBulkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setBulkUploading(true);
+    setBulkResult({ success: 0, failed: 0, errors: [] });
+    try {
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data);
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet);
+      let success = 0;
+      let failed = 0;
+      let errors: string[] = [];
+      for (const [i, row] of (rows as any[]).entries()) {
+        try {
+          // Map Excel columns to vehicle fields
+          const vehicleData = {
+            name: row['Name'] || '',
+            year: Number(row['Year']) || 0,
+            price: Number(row['Price']) || 0,
+            status: row['Status'] || 'available',
+            featured: row['Featured'] === 'Yes' || row['Featured'] === true,
+            imageUrl: row['Image URL'] || '',
+            mileage: Number(row['Mileage']) || 0,
+            transmission: row['Transmission'] || '',
+            rating: Number(row['Rating']) || 5,
+            brand: row['Brand'] || '',
+            bodyStyle: row['Body Style'] || '',
+            fuelType: row['Fuel Type'] || '',
+            overview: row['Overview'] || '',
+            features: row['Features'] ? String(row['Features']).split(',').map((f: string) => f.trim()) : [],
+            specifications: {},
+            history: {},
+            images: row['Images'] ? String(row['Images']).split(',').map((f: string) => f.trim()) : [],
+            highlightImage: row['Highlight Image'] || '',
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+          };
+          await addDoc(collection(db, 'vehicles'), vehicleData);
+          success++;
+        } catch (err: any) {
+          failed++;
+          errors.push(`Row ${i + 2}: ${err.message || err}`);
+        }
+      }
+      setBulkResult({ success, failed, errors });
+      if (success > 0) fetchVehicles();
+      toast.success(`Bulk upload complete: ${success} succeeded, ${failed} failed.`);
+    } catch (err: any) {
+      toast.error('Failed to process file.');
+      setBulkResult({ success: 0, failed: 0, errors: [err.message || String(err)] });
+    } finally {
+      setBulkUploading(false);
+    }
+  };
+
+  // Download template
+  const handleDownloadTemplate = () => {
+    const ws = XLSX.utils.json_to_sheet([
+      {
+        'Name': 'Sample Car',
+        'Year': 2022,
+        'Price': 25000,
+        'Status': 'available',
+        'Featured': 'Yes',
+        'Image URL': '',
+        'Mileage': 10000,
+        'Transmission': 'Automatic',
+        'Rating': 5,
+        'Brand': 'Toyota',
+        'Body Style': 'SUV',
+        'Fuel Type': 'Gasoline',
+        'Overview': 'A great car.',
+        'Features': 'Bluetooth,Backup Camera',
+        'Images': '',
+        'Highlight Image': '',
+      },
+    ]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Vehicles');
+    XLSX.writeFile(wb, 'vehicle-upload-template.xlsx');
+  };
+
   return (
     <div className="space-y-8">
       <div className="sm:flex sm:items-center sm:justify-between">
@@ -233,14 +321,23 @@ export default function VehiclesPage() {
           </p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-          <button
-            type="button"
-            onClick={() => setIsFormOpen(true)}
-            className="inline-flex items-center justify-center rounded-lg border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
-          >
-            <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
-            Add Vehicle
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setIsFormOpen(true)}
+              className="inline-flex items-center justify-center rounded-lg border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
+            >
+              <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
+              Add Vehicle
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsBulkModalOpen(true)}
+              className="inline-flex items-center justify-center rounded-lg border border-transparent bg-green-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
+            >
+              Bulk Upload
+            </button>
+          </div>
         </div>
       </div>
 
@@ -294,6 +391,42 @@ export default function VehiclesPage() {
         onSubmit={handleFormSubmit}
         vehicle={selectedVehicle}
       />
+
+      {/* Bulk Upload Modal/Section */}
+      {isBulkModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-xl shadow-lg p-8 max-w-lg w-full relative">
+            <button
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+              onClick={() => setIsBulkModalOpen(false)}
+              aria-label="Close"
+            >
+              ×
+            </button>
+            <h2 className="text-xl font-bold mb-2">Bulk Upload Vehicles</h2>
+            <p className="text-gray-500 mb-4 text-sm">Upload an Excel (.xlsx) or CSV file. <button className="text-indigo-600 underline ml-1" onClick={handleDownloadTemplate}>Download template</button></p>
+            <input
+              type="file"
+              accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
+              onChange={handleBulkUpload}
+              disabled={bulkUploading}
+              className="mb-4"
+            />
+            {bulkUploading && <div className="text-sm text-gray-500 mb-2">Uploading...</div>}
+            {(bulkResult.success > 0 || bulkResult.failed > 0) && (
+              <div className="mb-2 text-sm">
+                <span className="text-green-600">{bulkResult.success} succeeded</span>,{' '}
+                <span className="text-red-600">{bulkResult.failed} failed</span>
+              </div>
+            )}
+            {bulkResult.errors.length > 0 && (
+              <div className="max-h-32 overflow-y-auto text-xs text-red-500 bg-red-50 rounded p-2 mt-2">
+                {bulkResult.errors.map((err, i) => <div key={i}>{err}</div>)}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

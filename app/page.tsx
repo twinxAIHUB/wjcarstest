@@ -9,12 +9,50 @@ import { ArrowRight, Star, ChevronRight, Phone } from "lucide-react"
 import FeaturedVehicles from "./components/featured-vehicles"
 import VehicleCategories from './components/vehicle-categories'
 import { motion } from 'framer-motion';
+import { useEffect, useState } from "react";
+import { doc, getDoc, collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext
+} from "@/components/ui/carousel";
 // import { useTranslation } from './contexts/TranslationContext';
 
 export default function Home() {
   // const { t } = useTranslation();
   // Filter featured cars
   const featuredCars = cars.filter((car) => car.featured).slice(0, 4)
+  const [heroVideoUrl, setHeroVideoUrl] = useState<string | null>(null);
+  const [testimonials, setTestimonials] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchHeroVideoUrl = async () => {
+      try {
+        const docRef = doc(db, "siteConfig", "hero");
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setHeroVideoUrl(docSnap.data().videoUrl || null);
+        }
+      } catch (error) {
+        setHeroVideoUrl(null);
+      }
+    };
+    fetchHeroVideoUrl();
+
+    // Fetch testimonials
+    const fetchTestimonials = async () => {
+      try {
+        const snap = await getDocs(collection(db, "testimonials"));
+        setTestimonials(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      } catch (error) {
+        setTestimonials([]);
+      }
+    };
+    fetchTestimonials();
+  }, []);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -35,7 +73,7 @@ export default function Home() {
             className="w-full h-full object-cover"
             poster="/images/hero-bg.jpg"
           >
-            <source src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/11957140_1920_1080_60fps-mqz6omTWaVjuS0YYRmpeCAwUn7TNey.mp4" type="video/mp4" />
+            <source src={heroVideoUrl || "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/11957140_1920_1080_60fps-mqz6omTWaVjuS0YYRmpeCAwUn7TNey.mp4"} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         </div>
@@ -76,41 +114,43 @@ export default function Home() {
         transition={{ duration: 0.7 }}
       >
         <h2 className="text-3xl font-bold mb-8">What Our Customers Say</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            {
-              name: "John Smith",
-              role: "Satisfied Customer",
-              text: "The service at Wise was exceptional. They helped me find the perfect luxury vehicle that matched all my requirements.",
-            },
-            {
-              name: "Sarah Johnson",
-              role: "Repeat Customer",
-              text: "This is my second purchase from Wise and I couldn't be happier. Their attention to detail and customer service is unmatched.",
-            },
-            {
-              name: "Michael Chen",
-              role: "First-time Buyer",
-              text: "As a first-time luxury car buyer, I was nervous about the process. The team at Wise made everything simple and stress-free.",
-            },
-          ].map((testimonial, i) => (
-            <div key={i} className="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-md transition-shadow">
-              <div className="flex items-center mb-4">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star key={star} className="h-5 w-5 text-yellow-500 fill-yellow-500 mr-1" />
+        {testimonials.length === 0 ? (
+          <div className="text-gray-400 text-center">No testimonials yet.</div>
+        ) : (
+          <div className="relative max-w-2xl mx-auto">
+            <Carousel>
+              <CarouselContent>
+                {testimonials.map((testimonial, i) => (
+                  <CarouselItem key={testimonial.id || i}>
+                    <div className="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-md transition-shadow h-full flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center mb-4">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star key={star} className="h-5 w-5 text-yellow-500 fill-yellow-500 mr-1" />
+                          ))}
+                        </div>
+                        <p className="text-gray-600 mb-6">"{testimonial.text}"</p>
+                      </div>
+                      <div className="flex items-center mt-auto">
+                        {testimonial.imageUrl ? (
+                          <img src={testimonial.imageUrl} alt={testimonial.name} className="w-12 h-12 rounded-full object-cover mr-4" />
+                        ) : (
+                          <div className="w-12 h-12 rounded-full bg-gray-200 mr-4" />
+                        )}
+                        <div>
+                          <h4 className="font-semibold">{testimonial.name}</h4>
+                          <p className="text-sm text-gray-500">{testimonial.role}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </CarouselItem>
                 ))}
-              </div>
-              <p className="text-gray-600 mb-6">"{testimonial.text}"</p>
-              <div className="flex items-center">
-                <div className="w-12 h-12 rounded-full bg-gray-200 mr-4"></div>
-                <div>
-                  <h4 className="font-semibold">{testimonial.name}</h4>
-                  <p className="text-sm text-gray-500">{testimonial.role}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
+          </div>
+        )}
       </motion.section>
 
       {/* Services Section */}

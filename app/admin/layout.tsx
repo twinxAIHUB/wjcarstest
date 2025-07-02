@@ -26,7 +26,8 @@ import {
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: HomeIcon },
   { name: 'Vehicle Management', href: '/admin/vehicles', icon: TruckIcon },
-  { name: 'Documentation', href: '/admin/documentation', icon: DocumentTextIcon },
+  { name: 'Hero Video', href: '/admin/hero-video', icon: StarIcon },
+  { name: 'Testimonials', href: '/admin/testimonials', icon: UserGroupIcon },
   { name: 'Settings', href: '/admin/settings', icon: CogIcon },
 ]
 
