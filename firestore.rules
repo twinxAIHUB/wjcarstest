@@ -27,6 +27,14 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // Promotions collection
+    match /promotions/{promoId} {
+      allow read: if true;
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
     // Test collection
     match /_test_connection/{document=**} {
       allow read, write: if true;

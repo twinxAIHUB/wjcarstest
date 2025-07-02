@@ -28,6 +28,7 @@ const navigation = [
   { name: 'Vehicle Management', href: '/admin/vehicles', icon: TruckIcon },
   { name: 'Hero Video', href: '/admin/hero-video', icon: StarIcon },
   { name: 'Testimonials', href: '/admin/testimonials', icon: UserGroupIcon },
+  { name: 'Promotions', href: '/admin/promotions', icon: StarIcon },
   { name: 'Settings', href: '/admin/settings', icon: CogIcon },
 ]
 
