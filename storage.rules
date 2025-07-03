@@ -15,20 +15,22 @@ service firebase.storage {
       return isAuth && exists;
     }
 
+    // Allow vehicle images
     match /vehicles/{imageId} {
-      // Allow read access to everyone
       allow read: if true;
-      
-      // Allow write access to authenticated users with logging
-      allow write: if isAuthenticated() && (
-        // Log validation info
-        debug(sprintf(
-          "Auth: %s, UID: %s, Resource: %s",
-          request.auth,
-          request.auth.uid,
-          resource
-        )) || true
-      );
+      allow write: if isAuthenticated();
+    }
+
+    // Allow testimonial images
+    match /testimonials/{imageId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Allow promotion images
+    match /promotions/{imageId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
     }
     
     // Default rule - deny everything else

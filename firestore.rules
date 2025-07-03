@@ -27,6 +27,12 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // Testimonials collection
+    match /testimonials/{testimonialId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
     // Promotions collection
     match /promotions/{promoId} {
       allow read: if true;

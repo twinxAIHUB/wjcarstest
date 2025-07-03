@@ -127,13 +127,31 @@ export default function VehicleDetails({ id }: VehicleDetailsProps) {
 
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success('Your message has been sent! We will contact you shortly.');
-    setContactForm({
-      name: '',
-      email: '',
-      phone: '',
-      message: ''
-    });
+    try {
+      const carUrl = typeof window !== 'undefined' ? window.location.href : '';
+      const payload = {
+        name: contactForm.name,
+        email: contactForm.email,
+        phone: contactForm.phone,
+        message: contactForm.message,
+        carUrl,
+      };
+      const res = await fetch('https://services.leadconnectorhq.com/hooks/25b51W5t3pdeLhP4hzEs/webhook-trigger/f9bab453-6962-4c80-b0b4-0f7811132777', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error('Failed to send message');
+      toast.success('Your message has been sent! We will contact you shortly.');
+      setContactForm({
+        name: '',
+        email: '',
+        phone: '',
+        message: ''
+      });
+    } catch (err) {
+      toast.error('Failed to send message. Please try again.');
+    }
   };
 
   const handleImageLoad = useCallback(() => {

@@ -30,8 +30,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!car) {
     return {
-      title: "Car Not Found | Wise",
-      description: "The requested vehicle could not be found in our inventory.",
+      title: "WJ Cars Inventory",
+      description: "Browse our available vehicles at WJ Cars.",
+      openGraph: {
+        title: "WJ Cars Inventory",
+        description: "Browse our available vehicles at WJ Cars.",
+        images: [
+          {
+            url: "https://wjcarsales.com/images/logo.png",
+            width: 1200,
+            height: 630,
+            alt: "WJ Cars Logo",
+          },
+        ],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: "WJ Cars Inventory",
+        description: "Browse our available vehicles at WJ Cars.",
+        images: ["https://wjcarsales.com/images/logo.png"],
+      },
     }
   }
 
