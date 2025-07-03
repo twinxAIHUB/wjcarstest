@@ -1,5 +1,7 @@
 import { ImageResponse } from "next/og"
 import { cars } from "@/lib/data"
+import { db } from "@/lib/firebase"
+import { doc, getDoc } from "firebase/firestore"
 
 export const runtime = "edge"
 
@@ -14,13 +16,22 @@ export async function GET(request: Request) {
     let imageUrl = "https://wjcarsales.com/images/logo.png"
 
     // If car ID is provided, get car details
-    if (carId) {
-      const car = cars.find((car) => car.id === carId)
-      if (car) {
-        title = `${car.year} ${car.make} ${car.model} ${car.trim}`
-        description = car.shortDescription
-        imageUrl = car.images[0] || "https://wjcarsales.com/images/logo.png"
+    let car = carId ? cars.find((car) => car.id === carId) : null;
+    if (!car && carId) {
+      try {
+        const docRef = doc(db, "vehicles", carId);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          car = { id: docSnap.id, ...docSnap.data() } as any;
+        }
+      } catch (e) {
+        // ignore
       }
+    }
+    if (car) {
+      title = `${car.year} ${car.make} ${car.model} ${car.trim}`;
+      description = car.shortDescription || car.description || "";
+      imageUrl = car.images && car.images.length > 0 ? car.images[0] : "https://wjcarsales.com/images/logo.png";
     }
 
     return new ImageResponse(
