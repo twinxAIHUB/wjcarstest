@@ -641,7 +641,7 @@ export default function VehicleForm({ isOpen, onClose, onSubmit, vehicle }: Vehi
                     type="date"
                     id="history.lastService"
                     name="history.lastService"
-                    value={formData.history.lastService.split('T')[0]}
+                    value={formData.history.lastService ? formData.history.lastService.split('T')[0] : ''}
                     onChange={handleChange}
                     className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-colors"
                   />
