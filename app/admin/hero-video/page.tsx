@@ -6,9 +6,13 @@ import { db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { getStorage, ref, uploadBytes, getDownloadURL, uploadBytesResumable } from "firebase/storage";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { useAuth } from "@/lib/contexts/AuthContext";
+import { collection, getDocs } from "firebase/firestore";
 
-export default function HeroVideoAdminPage() {
+export default function AdminHeroVideoPage() {
+  const { user } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
   const [videoUrl, setVideoUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -35,24 +39,25 @@ export default function HeroVideoAdminPage() {
     fetchVideoUrl();
   }, []);
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      const docRef = doc(db, "siteConfig", "hero");
-      await setDoc(docRef, { videoUrl });
-      toast.success("Hero video URL updated!");
-    } catch (error) {
-      toast.error("Failed to update hero video URL");
-    } finally {
-      setSaving(false);
-    }
-  };
+  useEffect(() => {
+    const checkAdmin = async () => {
+      if (!user) {
+        setIsAdmin(false);
+        return;
+      }
+      try {
+        const adminDoc = await getDoc(doc(db, "admins", user.uid));
+        setIsAdmin(adminDoc.exists());
+      } catch {
+        setIsAdmin(false);
+      }
+    };
+    checkAdmin();
+  }, [user]);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setSelectedFile(file);
     if (!file.type.startsWith("video/")) {
       toast.error("Only video files are allowed.");
       return;
@@ -61,12 +66,17 @@ export default function HeroVideoAdminPage() {
       toast.error("File size must be 100MB or less.");
       return;
     }
+    setSelectedFile(file);
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile) return;
     setUploading(true);
     setProgress(0);
     try {
       const storage = getStorage();
-      const storageRef = ref(storage, `hero-section/${file.name}`);
-      const uploadTask = uploadBytesResumable(storageRef, file);
+      const storageRef = ref(storage, `hero-section/${Date.now()}_${selectedFile.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, selectedFile);
       uploadTask.on(
         "state_changed",
         (snapshot) => {
@@ -90,10 +100,26 @@ export default function HeroVideoAdminPage() {
     }
   };
 
-  const handleRemoveVideo = async () => {
-    setVideoUrl("");
-    setSelectedFile(null);
-    toast("Video removed. Click Save to update hero section.");
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !isAdmin) {
+      toast.error("You must be an admin to update the hero video.");
+      return;
+    }
+    if (!videoUrl) {
+      toast.error("Please provide a video URL or upload a video.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const docRef = doc(db, "siteConfig", "hero");
+      await setDoc(docRef, { videoUrl }, { merge: true });
+      toast.success("Hero video URL updated!");
+    } catch (error) {
+      toast.error("Failed to update hero video URL");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -126,9 +152,11 @@ export default function HeroVideoAdminPage() {
               disabled={uploading || saving || loading}
             />
             <p className="text-xs text-gray-400 mt-1">Max size: 100MB. Only video files are allowed.</p>
-            {selectedFile && (
-              <div className="mt-2 text-sm text-gray-600">
+            {selectedFile && !uploading && (
+              <div className="mt-2 text-sm text-gray-600 flex items-center gap-2">
                 <span className="font-medium">Selected:</span> {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+                <Button type="button" size="sm" variant="outline" onClick={() => setSelectedFile(null)} className="ml-2">Remove</Button>
+                <Button type="button" size="sm" onClick={handleUpload} disabled={uploading} className="ml-2">Upload</Button>
               </div>
             )}
             {uploading && (
@@ -147,11 +175,6 @@ export default function HeroVideoAdminPage() {
             <Button type="submit" disabled={saving || loading || uploading} className="w-full">
               {saving ? "Saving..." : "Save"}
             </Button>
-            {videoUrl && (
-              <Button type="button" variant="outline" onClick={handleRemoveVideo} disabled={saving || loading || uploading} className="w-full border-red-200 text-red-600 hover:bg-red-50">
-                Remove Video
-              </Button>
-            )}
           </div>
         </form>
         {videoUrl && (

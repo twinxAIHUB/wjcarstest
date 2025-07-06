@@ -22,6 +22,15 @@ import {
 } from "@/components/ui/carousel";
 // import { useTranslation } from './contexts/TranslationContext';
 
+// Helper to chunk array
+function chunkArray<T>(arr: T[], size: number): T[][] {
+  const res = [];
+  for (let i = 0; i < arr.length; i += size) {
+    res.push(arr.slice(i, i + size));
+  }
+  return res;
+}
+
 export default function Home() {
   // const { t } = useTranslation();
   // Filter featured cars
@@ -66,17 +75,33 @@ export default function Home() {
       >
         {/* Video background for all devices, fallback image if video fails */}
         <div className="absolute inset-0 w-full h-full">
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="w-full h-full object-cover"
-            poster="/images/hero-bg.jpg"
-          >
-            <source src={heroVideoUrl || "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/11957140_1920_1080_60fps-mqz6omTWaVjuS0YYRmpeCAwUn7TNey.mp4"} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
+          {heroVideoUrl ? (
+            <video
+              key={heroVideoUrl}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="w-full h-full object-cover"
+              poster="/images/hero-bg.jpg"
+            >
+              <source src={heroVideoUrl} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          ) : (
+            <video
+              key="default"
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="w-full h-full object-cover"
+              poster="/images/hero-bg.jpg"
+            >
+              <source src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/11957140_1920_1080_60fps-mqz6omTWaVjuS0YYRmpeCAwUn7TNey.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          )}
         </div>
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/30 flex flex-col justify-center px-4 md:px-16">
           <div className="max-w-4xl mx-auto">
@@ -118,38 +143,43 @@ export default function Home() {
         {testimonials.length === 0 ? (
           <div className="text-gray-400 text-center">No testimonials yet.</div>
         ) : (
-          <div className="relative max-w-2xl mx-auto">
+          <div className="relative max-w-5xl mx-auto">
             <Carousel>
               <CarouselContent>
-                {testimonials.map((testimonial, i) => (
-                  <CarouselItem key={testimonial.id || i}>
-                    <motion.div
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: i * 0.1 }}
-                      className="bg-white p-8 rounded-2xl border border-gray-200 shadow-lg hover:shadow-xl transition-shadow h-full flex flex-col justify-between relative"
-                    >
-                      <div className="absolute -top-6 left-6 bg-green-100 text-green-600 rounded-full p-2 shadow"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' strokeWidth={1.5} stroke='currentColor' className='w-7 h-7'><path strokeLinecap='round' strokeLinejoin='round' d='M7.5 15h-2.25A2.25 2.25 0 013 12.75v-1.5A2.25 2.25 0 015.25 9h2.25V6.75A2.25 2.25 0 019.75 4.5h.5a.75.75 0 01.75.75v2.25A2.25 2.25 0 0112.25 9h-2.5a.75.75 0 00-.75.75v1.5c0 .414.336.75.75.75h2.25A2.25 2.25 0 0114.5 15v2.25A2.25 2.25 0 0112.25 19.5h-.5a.75.75 0 01-.75-.75V16.5A2.25 2.25 0 019.75 15H7.5z' /></svg></div>
-                      <div className="flex items-center mb-4 mt-4">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star key={star} className="h-5 w-5 text-yellow-500 fill-yellow-500 mr-1" />
-                        ))}
-                      </div>
-                      <p className="text-gray-600 mb-8 text-lg italic">"{testimonial.text}"</p>
-                      <div className="flex items-center mt-auto">
-                        {testimonial.imageUrl ? (
-                          <span className="w-14 h-14 rounded-full border-4 border-green-200 overflow-hidden mr-4 block">
-                            <img src={testimonial.imageUrl} alt={testimonial.name} className="w-full h-full object-cover" />
-                          </span>
-                        ) : (
-                          <span className="w-14 h-14 rounded-full border-4 border-green-100 bg-gray-200 mr-4 block" />
-                        )}
-                        <div>
-                          <h4 className="font-semibold text-lg">{testimonial.name}</h4>
-                          <p className="text-sm text-gray-500">{testimonial.role}</p>
-                        </div>
-                      </div>
-                    </motion.div>
+                {chunkArray(testimonials, 3).map((testimonialGroup, i) => (
+                  <CarouselItem key={i}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                      {testimonialGroup.map((testimonial, j) => (
+                        <motion.div
+                          key={testimonial.id || j}
+                          initial={{ opacity: 0, y: 30 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5, delay: j * 0.1 }}
+                          className="bg-white px-8 py-10 rounded-2xl border border-gray-200 shadow-lg hover:shadow-xl transition-shadow h-full flex flex-col justify-between relative min-h-[340px]"
+                        >
+                          <div className="absolute -top-6 left-6 bg-green-100 text-green-600 rounded-full p-2 shadow"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' strokeWidth={1.5} stroke='currentColor' className='w-7 h-7'><path strokeLinecap='round' strokeLinejoin='round' d='M7.5 15h-2.25A2.25 2.25 0 013 12.75v-1.5A2.25 2.25 0 015.25 9h2.25V6.75A2.25 2.25 0 019.75 4.5h.5a.75.75 0 01.75.75v2.25A2.25 2.25 0 0112.25 9h-2.5a.75.75 0 00-.75.75v1.5c0 .414.336.75.75.75h2.25A2.25 2.25 0 0114.5 15v2.25A2.25 2.25 0 0112.25 19.5h-.5a.75.75 0 01-.75-.75V16.5A2.25 2.25 0 019.75 15H7.5z' /></svg></div>
+                          <div className="flex items-center mb-6 mt-4">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star key={star} className="h-5 w-5 text-yellow-500 fill-yellow-500 mr-1" />
+                            ))}
+                          </div>
+                          <p className="text-gray-600 mb-8 text-lg italic mt-2">"{testimonial.text}"</p>
+                          <div className="flex items-center mt-auto">
+                            {testimonial.imageUrl ? (
+                              <span className="w-14 h-14 rounded-full border-4 border-green-200 overflow-hidden mr-4 block">
+                                <img src={testimonial.imageUrl} alt={testimonial.name} className="w-full h-full object-cover" />
+                              </span>
+                            ) : (
+                              <span className="w-14 h-14 rounded-full border-4 border-green-100 bg-gray-200 mr-4 block" />
+                            )}
+                            <div>
+                              <h4 className="font-semibold text-lg">{testimonial.name}</h4>
+                              <p className="text-sm text-gray-500">{testimonial.role}</p>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
                   </CarouselItem>
                 ))}
               </CarouselContent>

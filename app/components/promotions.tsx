@@ -14,6 +14,15 @@ interface Promotion {
   imageUrl: string;
 }
 
+// Helper to chunk array
+function chunkArray<T>(arr: T[], size: number): T[][] {
+  const res = [];
+  for (let i = 0; i < arr.length; i += size) {
+    res.push(arr.slice(i, i + size));
+  }
+  return res;
+}
+
 export default function Promotions() {
   const [promos, setPromos] = useState<Promotion[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,21 +62,28 @@ export default function Promotions() {
       transition={{ duration: 0.7 }}
     >
       <h2 className="text-3xl font-bold mb-8">Promotions</h2>
-      <div className="relative max-w-3xl mx-auto">
+      <div className="relative max-w-5xl mx-auto">
         <Carousel>
           <CarouselContent>
-            {promos.map((promo, i) => (
-              <CarouselItem key={promo.id}>
-                <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-0 overflow-hidden flex flex-col h-full">
-                  <div className="relative w-full h-56 md:h-72">
-                    <Image src={promo.imageUrl} alt={promo.title} fill className="object-cover w-full h-full" />
-                  </div>
-                  <div className="p-6 flex-1 flex flex-col justify-between">
-                    <div>
-                      <h3 className="text-xl font-bold mb-2">{promo.title}</h3>
-                      <p className="text-gray-600 mb-2">{promo.description}</p>
+            {chunkArray(promos, 3).map((promoGroup, i) => (
+              <CarouselItem key={i}>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {promoGroup.map((promo, j) => (
+                    <div
+                      key={promo.id || j}
+                      className="bg-white rounded-2xl shadow-lg border border-gray-200 flex flex-col h-full overflow-hidden"
+                    >
+                      <div className="relative w-full h-56 md:h-72">
+                        <Image src={promo.imageUrl} alt={promo.title} fill className="object-cover w-full h-full" />
+                      </div>
+                      <div className="flex-1 flex flex-col justify-between px-8 py-6 md:px-10 md:py-8">
+                        <div>
+                          <h3 className="text-2xl font-bold mb-3">{promo.title}</h3>
+                          <p className="text-gray-600 text-base mb-1 md:mb-2">{promo.description}</p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
               </CarouselItem>
             ))}
