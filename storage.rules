@@ -32,6 +32,12 @@ service firebase.storage {
       allow read: if true;
       allow write: if isAuthenticated();
     }
+
+    // Allow hero video uploads (admin only)
+    match /hero-section/{videoId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
     
     // Default rule - deny everything else
     match /{allPaths=**} {
